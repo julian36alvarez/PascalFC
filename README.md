@@ -4,29 +4,44 @@
 
 1. rm
 
-        rm lab01a.pfc  
+       rm lab01a.pfc  
 
 2. edit
 
-         nano lab01a.pfc  
+       nano lab01a.pfc  
     
-3.    compile
+3. compile
 
-            pfccomp lab01a.pfc lab01a.lis lab01a  
+          pfccomp lab01a.pfc lab01a.lis lab01a  
     
 4. bug
 
-         nano lab01a.lis  
+       nano lab01a.lis  
     
 
 5. Execute
   
-        pint lab01a lab01a.pm  
+       pint lab01a lab01a.pm  
 
 ## lab01b
 
-    rm lab01b.pfc
-    nano lab01b.pfc
-    pfccomp lab01b.pfc lab01b.lis lab01b
-    nano lab01b.lis
-    pint lab01b lab01b.pm
+1. rm  
+
+       rm lab01b.pfc
+    
+2. edit    
+
+       nano lab01b.pfc
+    
+3. compile  
+
+       pfccomp lab01b.pfc lab01b.lis lab01b
+    
+4. bug 
+ 
+       nano lab01b.lis
+    
+5. Execute  
+
+       pint lab01b lab01b.pm
+    
