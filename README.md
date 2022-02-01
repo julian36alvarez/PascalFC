@@ -12,7 +12,7 @@
     
 3. compile
 
-          pfccomp lab01a.pfc lab01a.lis lab01a
+       pfccomp lab01a.pfc lab01a.lis lab01a
     
 4. bug
 
