@@ -2,15 +2,26 @@
 
 ## lab01a
 
-    rm lab01a.pfc  
+1. rm
 
-    nano lab01a.pfc  
+        rm lab01a.pfc  
 
-    pfccomp lab01a.pfc lab01a.lis lab01a  
+2. edit
 
-    nano lab01a.lis  
+         nano lab01a.pfc  
+    
+3.    compile
 
-    pint lab01a lab01a.pm  
+            pfccomp lab01a.pfc lab01a.lis lab01a  
+    
+4. bug
+
+         nano lab01a.lis  
+    
+
+5. Execute
+  
+        pint lab01a lab01a.pm  
 
 ## lab01b
 
