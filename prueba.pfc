@@ -1,0 +1,5 @@
+program prueba;
+
+ begin
+  writeln ('Hello word')
+ end.
