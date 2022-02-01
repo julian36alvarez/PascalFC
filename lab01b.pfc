@@ -2,8 +2,8 @@ program lab01b;
 
 var i, j, dimension : Integer;
 var producto: Real;
-var vektor1: array[0..1000] of Real;
-var vektor2: array[0..1000] of Real;
+var vektor1: array[0..2000] of Real;
+var vektor2: array[0..2000] of Real;
 begin
     
     Write( 'Introduzca longitud de los vectores: ' );
