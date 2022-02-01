@@ -1,0 +1,39 @@
+program lab01b;
+
+var i, j, dimension : Integer;
+var producto: Real;
+var vektor1: array[0..1000] of Real;
+var vektor2: array[0..1000] of Real;
+begin
+    
+    Write( 'Introduzca longitud de los vectores: ' );
+    ReadLn( i );
+
+    dimension:= i-1;
+        
+    begin
+        for j := 0 to dimension do
+        begin
+              Write( 'Introduzca valores para el vector 1: ' );
+              ReadLn( vektor1[j] );
+        end;      
+    end;
+
+    begin
+        for j := 0 to dimension do
+        begin
+              Write( 'Introduzca valores para el vector 2: ' );
+              ReadLn( vektor2[j] );
+        end;      
+    end;
+
+    begin
+    producto := 0;
+        for j := 0 to dimension do
+        begin
+              producto := ((vektor1[j] * vektor2[j]) + producto);
+        end;      
+    end;
+
+    WriteLn(producto);
+end.
