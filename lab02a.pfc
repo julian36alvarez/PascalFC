@@ -1,0 +1,11 @@
+const N = …;
+type Tvector = ARRAY [1..N] of integer;
+process type Tminimo(v: Tvector; inf, sup: integer; var min: integer);
+var i: integer;
+begin
+min := v[inf];
+for i:= inf + 1 to sup do
+if v[i] < min then
+min := v[i];
+end;
+var process1,process2: Tminimo; 
