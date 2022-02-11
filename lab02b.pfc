@@ -1,0 +1,75 @@
+program lab02b;
+
+type Tvector = array[0..200] of Real;
+
+var longitud, j, m, dimension, procesos : Integer;
+var vektor1, vektor2: Tvector;
+
+process type TvectorPoint(vektorP1,vektorP2:Tvector; init, endIn:Integer; var result: Real);
+    var k: Integer;
+    var producto: Real;
+        begin   
+            begin
+            producto := 0;
+                for k := init to endIn do
+                begin
+                    producto := ((vektorP1[k] * vektorP2[k]) + producto);
+                end;      
+            end;
+            result:= producto;
+             (*WriteLn(result);*) 
+        end;
+
+    (*var process1, process2:TvectorPoint;
+    var result1, result2, resultFinal: Real;*)
+
+    type Tprocesses = ARRAY [0..199] of TvectorPoint;
+    Tresult = ARRAY [0..200] of Real;
+    var processes: Tprocesses;
+    var result: Tresult;
+    var resultFinal: Real;
+    begin
+        Write( 'Introduzca longitud de los vectores: ' );
+        ReadLn( longitud );
+
+        dimension:= longitud-1;
+
+        Write( 'Introduzca numero de procesos: ' );
+        ReadLn( procesos );
+
+        while longitud mod procesos <> 0 do
+        begin
+            Write( 'Introduzca numero de procesos, debe ser divisor de la longitud del vector: ' );
+            ReadLn( procesos );
+        end;
+            
+        begin
+            for j := 0 to dimension do
+            begin
+                Write( 'Introduzca valores para el vector 1: ' );
+                ReadLn( vektor1[j] );
+            end;      
+        end;
+
+        begin
+            for j := 0 to dimension do
+            begin
+                Write( 'Introduzca valores para el vector 2: ' );
+                ReadLn( vektor2[j] );
+            end;      
+        end;
+
+        begin
+            cobegin
+                for j:=0 to (procesos-1) do
+                    processes[j](vektor1, vektor2, j * (longitud div procesos) , (j + 1) * (longitud div procesos)-1, result[j]);
+                (* process2(vektor1, vektor2, (longitud div 2), dimension, result2); *)
+            coend;
+          resultFinal:=0;
+          for m := 0 to (procesos-1) do              
+                begin
+                    resultFinal := resultFinal + result[m];
+                end; 
+            WriteLn(resultFinal);
+        end;    
+    end.
