@@ -1,11 +1,60 @@
-const N = …;
-type Tvector = ARRAY [1..N] of integer;
+program lab02a;
+
+type Tvector = array[1..989] of Integer;
+
+var longitud, j,  procesos, resultFinal : Integer;
+var vektor1, vektor2: Tvector;
+
 process type Tminimo(v: Tvector; inf, sup: integer; var min: integer);
-var i: integer;
-begin
-min := v[inf];
-for i:= inf + 1 to sup do
-if v[i] < min then
-min := v[i];
-end;
-var process1,process2: Tminimo; 
+    var i: integer;
+    begin
+        min := v[inf];
+        for i:= inf + 1 to sup do
+        if v[i] < min then
+        min := v[i];
+    end;
+
+    type Tprocesses = ARRAY [1..200] of Tminimo;
+    Tmin = ARRAY [1..200] of Integer;
+    var processes: Tprocesses;
+    min: Tmin;
+
+    begin
+        Write( 'Introduzca longitud de vector: ' );
+        ReadLn( longitud );
+
+        Write( 'Introduzca numero de procesos: ' );
+        ReadLn( procesos );
+
+        while longitud mod procesos <> 0 do
+        begin
+            Write( 'Introduzca numero de procesos, debe ser divisor de la longitud del vector: ' );
+            ReadLn( procesos );
+        end;
+            
+        begin
+            for j := 1 to longitud do
+            begin
+                Write( 'Introduzca valores para el vector: ' );
+                ReadLn( vektor1[j] );
+            end;      
+        end;
+
+
+        begin
+            cobegin
+                for j := 1 to procesos do
+                processes[j](vektor1, (j-1) * (longitud div procesos) + 1, j * (longitud div procesos), min[j]);
+            coend;
+          
+                resultFinal := min[1];
+                for j:= 1  to procesos do
+                    if min[j] < resultFinal then
+                    resultFinal := min[j];
+             
+             WriteLn(resultFinal);
+
+        end;    
+    end.
+
+
