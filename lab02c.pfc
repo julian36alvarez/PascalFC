@@ -1,0 +1,89 @@
+program lab02c;
+
+type Tvector = array[1..200] of Real;
+var longitud, j, k,m,  procesos, resultFinal : Integer;
+var vektor1: Tvector;
+
+process type Tminimo(datos: Tvector; inf, sup: integer; var datosResult: Tvector);
+    var i, l: integer;
+    var reOrden: Real;
+    begin
+
+        l:=0;
+        for i:= inf to sup  do
+        begin
+            l:=l+1;
+            datosResult[l]:= datos[i];
+        end;
+
+        for i:= 1 to l  do
+            for j := 1 to l -1  do
+            if datosResult[j] > datosResult[j + 1] then
+            begin
+                reOrden:=datosResult[j+1];
+                datosResult[j+1]:=datosResult[j];
+                datosResult[j]:=reOrden;
+            end;
+
+        (*for i:=1 to l do
+                WriteLn(datosResult[i]);*)
+
+    end;
+
+    type Tprocesses = ARRAY [1..200] of Tminimo;
+    Tmin = ARRAY [1..200] of Tvector;
+    var processes: Tprocesses;
+    min: Tmin;
+    var i, l: integer;
+    var vektorResultado: array[1..200] of Real;
+    var reOrden: Real;
+    begin
+        Write( 'Introduzca longitud de vector: ' );
+        ReadLn( longitud );
+
+        Write( 'Introduzca numero de procesos: ' );
+        ReadLn( procesos );
+
+        while longitud mod procesos <> 0 do
+        begin
+            Write( 'Introduzca numero de procesos, debe ser divisor de la longitud del vector: ' );
+            ReadLn( procesos );
+        end;
+            
+        begin
+            for j := 1 to longitud do
+            begin
+                Write( 'Introduzca valores para el vector: ' );
+                ReadLn( vektor1[j] );
+            end;      
+        end;
+
+
+        begin
+            cobegin
+                for j := 1 to procesos do
+                processes[j](vektor1, (j-1) * (longitud div procesos) + 1, j * (longitud div procesos), min[j]);
+            coend;
+          
+            m:=0;
+            for j:= 1 to procesos do
+                for k:= 1 to (longitud div procesos) do
+                begin
+                    m:=m+1;
+                    vektorResultado[m]:= min[j][K];
+                end;    
+            
+            for i:= 1 to longitud  do
+            for j := 1 to longitud -1  do
+            if vektorResultado[j] > vektorResultado[j + 1] then
+            begin
+                reOrden:=vektorResultado[j+1];
+                vektorResultado[j+1]:=vektorResultado[j];
+                vektorResultado[j]:=reOrden;
+            end;
+
+            for i:=1 to longitud do
+                WriteLn(vektorResultado[i]);
+
+        end;    
+    end.
