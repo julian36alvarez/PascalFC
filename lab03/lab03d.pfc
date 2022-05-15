@@ -1,0 +1,115 @@
+program lab03d;
+
+const P = 197;
+type Avector = array[0..314, 0..59] of Integer;
+type Bvector = array[0..59, 0..179] of Integer;
+var  afilas, acolumnas, bfilas, bcolumnas, procesos, j, x ,y, a, b, c: Integer;
+var amatriz: Avector;
+var bmatriz: Bvector;
+type Tcanal = channel of Integer;
+Tcanales = array[0..2000] of Tcanal;
+
+    process type TPvector(var canalIn: Tcanal; var acanalout, bcanalout: Tcanales; filas, columnas:Integer; var amatriz:Avector ; var bmatriz: Bvector);
+    var j, result, test : Integer;
+        begin
+            test:=0;
+            for c := 0 to filas do
+                begin
+                    for a := 0 to filas do
+                        begin
+                            for b := 0 to columnas do
+                                begin
+                                    acanalout[test] ! amatriz[b][c];
+                                    bcanalout[test] ! bmatriz[a][b];                                     
+                                end;
+                                test:= test+1;   
+                                canalIn ? result;
+                                Write(result); 
+                                if a < filas then
+                                begin
+                                    Write(' '); 
+                                end;    
+                                                 
+                        end;
+                        WriteLn(' ');
+                        
+            end; 
+                        
+        end;
+
+    process type TPProductPoint(var canalIn, vsndin: Tcanal; var canalOut :Tcanal; ndatos:Integer);
+    var i: integer;
+    var dato:Integer;
+    var seconddato:Integer;
+    var producto:Integer;
+    
+    begin
+    producto := 0;
+    for i:= 0 to ndatos do
+        begin
+            canalIn ? dato;
+            vsndin ? seconddato;
+            producto := (dato * seconddato) + producto;
+        end;
+        {WriteLn(producto);}
+        canalOut !  producto;
+    end;
+
+
+    process type TPGlobalProductPoint(var canalIn:Tcanales; var canalOut:Tcanal ; pointprocesses:Integer);
+    var i: integer;
+    var dato:Integer;
+    var seconddato:Integer;
+    var producto:Integer;
+    begin
+        for i:= 0 to pointprocesses do
+        begin
+            canalIn[i] ? dato;
+           { producto := (dato + producto);}
+            canalOut !  dato;
+        end;
+    end;
+
+    type Tprocesses = ARRAY[0..P] of TPProductPoint;
+    var pvector: TPvector;
+    var locales: Tprocesses;
+    var mglobal: TPGlobalProductPoint;
+    var leftchannel, secondleft: Tcanales;
+    var rightchannel: Tcanales;
+    var canalproduct: Tcanal;
+
+    begin
+        
+        ReadLn( afilas );
+        ReadLn( acolumnas );
+        ReadLn( bcolumnas );   
+        ReadLn( procesos );  
+        bfilas:=acolumnas;
+        
+        for y := 0 to (afilas-1) do
+            begin
+                for x := 0 to (acolumnas-1) do
+                    begin
+                        Read(amatriz[x][y]);    
+                    end;  
+            end;
+
+        for y := 0 to (bfilas-1) do
+            begin
+                for x := 0 to (bcolumnas-1) do
+                    begin
+                        Read(bmatriz[x][y]);    
+                    end;  
+            end; 
+
+        begin
+            cobegin
+                pvector(canalproduct, leftchannel, secondleft, (afilas-1), (acolumnas-1), amatriz, bmatriz);
+                    for j := 0 to ((procesos*procesos)-1) do
+                        locales[j](leftchannel[j], secondleft[j],  rightchannel[j], (acolumnas-1));
+                mglobal(rightchannel, canalproduct, ((procesos*procesos)-1));
+            coend;
+        end;
+
+
+    end.

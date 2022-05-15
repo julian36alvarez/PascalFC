@@ -1,0 +1,29 @@
+- Pascal-FC for IBM PC compatibles - 
+- GNU Compiler Version P5.2.1.5
+
+G L Davies  &  A Burns, University of York
+G Ospina, Escuela Colombiana de Ingenieria Julio Garavito
+
+Compiler listing
+
+    1     0 program prueba;
+    2     0 
+    3     0  begin
+    4     0   writeln ('Hello word')
+    5     2  end.
+
+
+
+Symbol table
+
+    name       link      objekt       type         ref      nrm  lev  adr  aux
+
+ 45 _main        44     procedure   notyp           2      True    0    0    0
+ 46 any           0     variable    synch           0      True    1    5    0
+
+Generated P-code
+
+    0     ldcon.i      0        10          ;4
+    1     wrstr        0         0          ;4
+    2     wrlin        0         0          ;4
+    3     stopx        0         0          ;4

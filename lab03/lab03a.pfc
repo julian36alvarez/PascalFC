@@ -1,0 +1,81 @@
+program lab03a;
+
+const P = 200;
+const N = 2000;
+type Tcanal = channel of Integer;
+type Tvector = array[1..N] of Integer;
+Tcanales = array[1..P] of Tcanal;
+var vektorDatos: Tvector;
+
+    process type TPvector(var canalIn: Tcanal; var canalOut: Tcanales; longitud, procesos:Integer; var vektor1: Tvector);
+    var j, minimo : Integer;
+        begin
+            {distribuir datos del vektor}
+            begin
+                for j := 1 to longitud do
+                begin
+                    canalOut[(j mod procesos) + 1] ! vektor1[j];
+                end;      
+            end;
+            canalIn ? minimo;
+            WriteLn(minimo);
+        end;
+
+    process type TPminimo(var canalIn: Tcanal; var canalOut :Tcanal; ndatos:Integer);
+    var i: integer;
+    var dato:Integer;
+    var min:Integer;
+    begin
+    min:= 999999999;
+    for i:= 1 to ndatos do
+        begin
+            canalIn ? dato;
+             if dato < min then
+                min := dato;
+        end;
+        canalOut !  min;
+    end;
+
+    process type TPminimoGlobal(var canalIn:Tcanales; var canalOut:Tcanal; longitud, procesos:Integer);
+    var i: integer;
+    var dato:Integer;
+    var min:Integer;
+    begin
+    canalIn[1] ? min;
+        for i:= 2 to procesos do
+        begin
+            canalIn[i] ? dato;
+            if dato < min then
+                min := dato;
+        end;
+        canalOut !  min;
+    end;
+
+    type Tprocesses = ARRAY[1..P] of TPminimo;
+    var pvector: TPvector;
+    var locales: Tprocesses;
+    var mglobal: TPminimoGlobal;
+    var canalIz: Tcanales;
+    var canDer: Tcanales;
+    var canalMinino: Tcanal;
+    var j: integer;
+    var longitud, procesos : Integer;
+    begin
+        ReadLn( longitud );
+        ReadLn( procesos );
+        {leer el vektor}            
+        begin
+          for j := 1 to longitud do
+            begin
+                ReadLn( vektorDatos[j] );
+            end;      
+        end;
+        begin
+            cobegin
+                pvector(canalMinino, canalIz, longitud, procesos, vektorDatos);
+                    for j := 1 to procesos do
+                        locales[j](canalIz[j], canDer[j], (longitud div procesos));
+                mglobal(canDer, canalMinino, longitud, procesos);
+            coend;
+        end;    
+    end.

@@ -1,0 +1,169 @@
+program parcial;
+
+
+const N = 9;
+var juego, x, y, xcelda, ycelda : Integer;
+var play: Char;
+type Tvector = array[0..N, 0..N] of Integer;
+var vecktor: Tvector;
+type Tcanal = channel of Integer;
+Tcanales = array[1..2000] of Tcanal;
+
+
+    process type TPvector(var canalIn: Tcanales; var canalOut, valor: Tcanales; var vektor1: Tvector);
+    var j, m, vecinos, muereovive : Integer;
+    var copy: Tvector;
+        begin
+        {while true do}
+           for m:= 1 to 7 do
+            begin
+            copy := vektor1;
+                {calcular vecinos cercanos Y distribuir PESO}
+                j:=1;
+                for y := 0 to N do
+                begin
+                    for x := 0 to N do
+                    begin
+                        vecinos :=  vektor1[(x - 1) mod (N+1)][(y - 1) mod (N+1)] + 
+                                    vektor1[(x) mod (N+1)][(y - 1) mod (N+1)] + 
+                                    vektor1[(x + 1) mod (N+1)][(y - 1) mod (N+1)] + 
+                                    vektor1[(x - 1) mod (N+1)][(y) mod (N+1)] + 
+                                    vektor1[(x + 1) mod (N+1)][(y) mod (N+1)] + 
+                                    vektor1[(x - 1) mod (N+1)][(y + 1) mod (N+1)] + 
+                                    vektor1[(x) mod (N+1)][(y + 1) mod (N+1)] + 
+                                    vektor1[(x + 1) mod (N+1)][(y + 1) mod (N+1)];
+                                    {canalOut[j] ! vecinos;
+                                    valor[j] ! vektor1[x][y];}
+                                    { WriteLn(vektor1[x][y]);}
+                                    if ((vektor1[x][y] = 0) and (vecinos = 3) ) then
+                                    begin
+                                        muereovive := 1;
+                                        copy[x][y] :=muereovive;
+                                    end;
+                                    {muere}
+                                    if ((vektor1[x][y] = 1) and ((vecinos < 2 ) or (vecinos >3))) then
+                                    begin
+                                        muereovive := 0;
+                                        copy[x][y] := muereovive
+                                    end;
+                                    
+                                    if(copy[x][y]=1) then
+                                            write('X')
+                                    else
+                                            write('-');
+                                    if x < N then
+                                            write('+');          
+                    end;  
+                    WriteLn(' ');
+                    
+                end;
+            WriteLn(' '); 
+
+            vektor1 := copy;
+            end;
+            
+        end;
+
+    {matar o revivir}
+    process type TPvecino(var canalIn: Tcanal; var valor:Tcanal; var canalOut :Tcanal);
+    var i: integer;
+    var dato:Integer;
+    var vecinos:Integer;
+    var muereovive:Integer;
+    begin
+        canalIn ? vecinos;
+        valor ? dato;
+            {vive}
+            if ((dato = 0) and (vecinos = 3) ) then
+            begin
+                muereovive := 1;
+            end;
+            {muere}
+            if ((dato = 1) and ((vecinos < 2 ) or (vecinos >3))) then
+            begin
+                muereovive := 0;
+            end;
+        canalOut !  muereovive;
+    end;
+
+var pvector: TPvector;
+var matarrevivir: TPvecino;
+var canalVecino, vecino, valor : Tcanales;
+var i : Integer;
+begin
+  juego:=0;
+  xcelda := 3;
+  ycelda := 5;
+  vecktor[xcelda mod (N+1)][ycelda mod (N+1)] := 1;
+    while juego=0 do
+        begin
+            for y := 0 to N do
+            begin
+                for x := 0 to N do
+                begin
+                    if(vecktor[x][y]=1) then
+                        write('X')
+                    else
+                        write('-');
+                    if x < N then
+                        write('+');
+                    end;   
+            WriteLn(' ');
+            end;
+
+            WriteLn('Para moverse use las teclas a-d w-s');
+            WriteLn('Para pintar pulse f');
+            WriteLn('Para iniciar el juego pulse j');
+            ReadLn(play);
+            If play = 'w' Then
+            begin
+                vecktor[xcelda mod (N+1)][ycelda mod (N+1)] := 0;
+                xcelda := xcelda ;
+                ycelda := ycelda -1;
+                vecktor[xcelda mod (N+1)][ycelda mod (N+1)] := 1;
+            end;
+            If play = 's' Then
+            begin
+                vecktor[xcelda mod (N+1)][ycelda mod (N+1)] := 0;
+                xcelda := xcelda;
+                ycelda := ycelda +1;
+                vecktor[xcelda mod (N+1)][ycelda mod (N+1)] := 1;
+            end;
+            If play = 'd' Then
+            begin
+                vecktor[xcelda mod (N+1)][ycelda mod (N+1)] := 0;
+                xcelda := xcelda +1;
+                ycelda := ycelda;
+                vecktor[xcelda mod (N+1)][ycelda mod (N+1)] := 1;
+            end;   
+            If play = 'a' Then
+            begin
+                vecktor[xcelda mod (N+1)][ycelda mod (N+1)] := 0;
+                ycelda := ycelda ;
+                xcelda := xcelda -1;
+                vecktor[xcelda mod (N+1)][ycelda mod (N+1)] := 1;
+            end;  
+            If play = 'f' Then
+            begin
+                vecktor[xcelda mod (N+1)][ycelda mod (N+1)] := 1;
+                xcelda := xcelda +1;
+                vecktor[(xcelda mod (N+1))][ycelda mod (N+1)] := 1;
+            end; 
+            If play = 'j' Then
+            begin
+                juego := 1;
+            end;   
+        end;   
+
+    
+    begin
+        cobegin
+      
+            pvector(canalVecino, vecino, valor, vecktor);
+            {for i:= 1 to 1 do
+            matarrevivir(vecino[i], valor[i],  canalVecino[i]);}
+        coend;
+    end;
+
+end.
+

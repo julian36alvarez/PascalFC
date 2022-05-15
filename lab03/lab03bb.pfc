@@ -1,0 +1,102 @@
+program lab03b;
+
+const P = 200;
+const N = 2000;
+type Tcanal = channel of Integer;
+type TSecondcanal = channel of Integer;
+type Tvector = array[1..N] of Integer;
+Tcanales = array[1..2000] of Tcanal;
+Ttwicecanales = array[1..2000] of TSecondcanal;
+var vecktordata: Tvector;
+var othervecktordata: Tvector;
+
+    process type TPvector(var canalIn: Tcanal; var canaDoublelIn: TSecondcanal; var canalSecondOut: Tcanales; var canalOut: Ttwicecanales; lengthv, pointprocesses:Integer; var vektor1, vektor2: Tvector);
+    var j, result, test : Integer;
+        begin
+            
+            begin
+                for j := 1 to lengthv do
+                begin
+                    canalSecondOut[(j mod pointprocesses) + 1] ! vektor2[j];
+                    canalOut[(j mod pointprocesses) + 1] ! vektor1[j];
+                end;      
+            end;
+            canalIn ? result;
+            WriteLn(result);
+            canaDoublelIn ? test;
+        end;
+
+
+    process type TPProductPoint(var canalIn: Tcanal;var otherchannelin:TSecondcanal; var canalOut :Tcanal; var scchout:TSecondcanal ; ndatos:Integer);
+    var i: integer;
+    var dato:Integer;
+    var seconddato:Integer;
+    var producto:Integer;
+    begin
+    producto:= 0;
+    for i:= 1 to ndatos do
+        begin
+            canalIn ? dato;
+            otherchannelin ? seconddato;
+            producto := ((dato * seconddato) + producto);
+        end;
+        canalOut !  producto;
+        scchout !  producto;
+    end;
+
+
+    process type TPGlobalProductPoint(var canalIn:Tcanales; var blokedosin:Ttwicecanales; var canalOut:Tcanal ; var scchout:TSecondcanal; pointprocesses:Integer);
+    var i: integer;
+    var dato:Integer;
+    var seconddato:Integer;
+    var producto:Integer;
+    begin
+    producto:= 0;
+        for i:= 1 to pointprocesses do
+        begin
+            canalIn[i] ? dato;
+            blokedosin[i] ? seconddato;
+            producto := (dato + producto);
+        end;
+        canalOut !  producto;
+        scchout !  producto;
+    end;
+
+
+    type Tprocesses = ARRAY[1..P] of TPProductPoint;
+    var pvector: TPvector;
+    var locales: Tprocesses;
+    var mglobal: TPGlobalProductPoint;
+    var leftchannel: Tcanales;
+    var leftSecondchannel: Ttwicecanales;
+    var rightchannel: Tcanales;
+    var secondrightchannel: Ttwicecanales;
+    var canalproduct: Tcanal;
+    var secondcanalproduct: TSecondcanal;
+    var j: integer;
+    var lengthv, pointprocesses : Integer;
+    begin
+        ReadLn( lengthv );
+        ReadLn( pointprocesses );
+                   
+        begin
+          for j := 1 to lengthv do
+            begin
+                ReadLn( vecktordata[j] );
+            end;      
+        end;
+        begin
+          for j := 1 to lengthv do
+            begin
+                ReadLn( othervecktordata[j] );
+            end;      
+        end;
+        begin
+            cobegin
+                pvector(canalproduct, secondcanalproduct, leftchannel, leftSecondchannel, lengthv, pointprocesses, vecktordata, othervecktordata);
+                    for j := 1 to pointprocesses do
+                        locales[j](leftchannel[j], leftSecondchannel[j], rightchannel[j], secondrightchannel[j], (lengthv div pointprocesses));
+                mglobal(rightchannel, secondrightchannel, canalproduct, secondcanalproduct, pointprocesses);
+            coend;
+        end;    
+    end.

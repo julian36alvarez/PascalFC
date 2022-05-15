@@ -1,0 +1,66 @@
+program lab02c;
+
+const N = 2000;
+const P = 200;
+type Tvector = array[1..N] of Real;
+var longitud, i, j, l, m, procesos, resultFinal : Integer;
+var vektor1, vektorResultado: Tvector;
+
+var reOrden: Real;
+
+process type Tminimo(var datos: Tvector; inf, sup: integer; var datosResult: Tvector);
+    var i, l: integer;
+    var reOrden: Real;
+    begin
+        l:=0;
+        for i:= inf to sup  do
+        begin
+            l:=l+1;
+            datosResult[l]:= datos[i];
+        end;
+        for i:= 1 to l  do
+            for j := 1 to l -1  do
+            if datosResult[j] > datosResult[j + 1] then
+            begin
+                reOrden:=datosResult[j+1];
+                datosResult[j+1]:=datosResult[j];
+                datosResult[j]:=reOrden;
+            end;
+    end;
+
+    type Tprocesses = ARRAY [1..P] of Tminimo;
+    var processes: Tprocesses;
+    min: Tvector;
+    begin
+        ReadLn( longitud );
+        ReadLn( procesos );            
+        begin
+            for j := 1 to longitud do
+            begin
+                ReadLn( vektor1[j] );
+            end;      
+        end;
+
+        begin
+            cobegin
+                for j := 1 to procesos do
+                processes[j](vektor1, (j-1) * (longitud div procesos) + 1, j * (longitud div procesos), min);
+            coend;
+
+            min:= vektor1;
+
+            for i:= 1 to longitud  do
+            for j := 1 to longitud -1  do
+            if min[j] > min[j + 1] then
+            begin
+                reOrden:=min[j+1];
+                min[j+1]:=min[j];
+                min[j]:=reOrden;
+            end;
+            for i:=1 to longitud do
+                WriteLn(min[i]);
+
+        end;    
+    end.
+
+

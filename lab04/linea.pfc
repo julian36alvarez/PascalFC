@@ -1,0 +1,14 @@
+program linea;
+  var c: char;
+      nc: integer;
+      o: char;
+      no: integer;
+      m: integer;
+begin
+  read(c);
+  read(nc);
+  read(o);
+  read(no);
+  readln(m);
+  writeln(c, ' ', nc, ' ', o, ' ', no, ' ', m);
+end.

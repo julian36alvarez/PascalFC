@@ -1,0 +1,52 @@
+program lab02b;
+const N = 1999;
+type Tvector = array[0..N] of Real;
+var longitud, j, m, dimension, procesos : Integer;
+var vektor1, vektor2, result: Tvector;
+process type TvectorPoint(var vektorP1,vektorP2:Tvector; init, endIn:Integer; var result: Real);
+    var k: Integer;
+    var producto: Real;
+        begin   
+            begin
+            producto := 0;
+                for k := init to endIn do
+                begin
+                    producto := ((vektorP1[k] * vektorP2[k]) + producto);
+                end;      
+            end;
+            result:= producto;
+        end;
+    type Tprocesses = ARRAY [0..199] of TvectorPoint;
+    var processes: Tprocesses;
+    var resultFinal: Real;
+    begin
+        ReadLn( longitud );
+        dimension:= longitud-1;
+        ReadLn( procesos );         
+        begin
+            for j := 0 to dimension do
+            begin
+                ReadLn( vektor1[j] );
+            end;      
+        end;
+        begin
+            for j := 0 to dimension do
+            begin
+                ReadLn( vektor2[j] );
+            end;      
+        end;
+        begin
+            cobegin
+                for j:=0 to (procesos-1) do
+                    processes[j](vektor1, vektor2, j * (longitud div procesos) , (j + 1) * (longitud div procesos)-1, result[j]);
+            coend;           
+          resultFinal:= 0;
+          for m := 0 to (procesos-1) do              
+                begin
+                    resultFinal := resultFinal + result[m];
+                end; 
+            WriteLn(resultFinal);
+        end;    
+    end.
+
+

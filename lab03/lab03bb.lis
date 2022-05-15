@@ -1,0 +1,371 @@
+- Pascal-FC for IBM PC compatibles - 
+- GNU Compiler Version P5.2.1.5
+
+G L Davies  &  A Burns, University of York
+G Ospina, Escuela Colombiana de Ingenieria Julio Garavito
+
+Compiler listing
+
+    1     0 program lab03bb;
+    2     0 
+    3     0 const P = 200;
+    4     0 const N = 2000;
+    5     0 type Tcanal = channel of Integer;
+    6     0 type Tvector = array[1..N] of Integer;
+    7     0 Tcanales = array[1..P] of Tcanal;
+    8     0 var vektorDatos: Tvector;
+    9     0 var othervecktordata: Tvector;
+   10     0     process type TPvector(var canalIn: Tcanal; var canalOut: Tcanales; longitud, procesos:Integer; var vektor1, vektor2: Tvector);
+   11     0     var j, i, vekl, producto : Integer;
+   12     0         begin
+   13     0             {distribuir datos del vektor}
+   14     0             begin
+   15     0                 i:= 1;
+   16     3                 vekl:= longitud * 2;
+   17     8                 for j := 1 to vekl do
+   18    12                     begin
+   19    12                         if i <= longitud then
+   20    16                             begin
+   21    16                                 canalOut[i] ! vektor1[j];
+   22    24                                 WriteLn('Caso 1');
+   23    27                                 WriteLn(vektor1[j]);
+   24    33                             end
+   25    33                         else
+   26    33                             begin
+   27    34                                 canalOut[i] ! vektor2[j];
+   28    42                                 WriteLn('Caso 2');
+   29    45                                 WriteLn(vektor2[j]);
+   30    51                             end;
+   31    51                     i:=i + 1;    
+   32    56                     end;      
+   33    57             end;
+   34    57             {escribir el minimo}
+   35    57             
+   36    57             producto := 0;
+   37    60             for j := 1 to longitud do
+   38    64                 begin
+   39    64                     producto := ((vektor1[j] * vektor2[j]) + producto);
+   40    77                 end;  
+   41    78             WriteLn(producto);
+   42    81             canalIn ? producto;
+   43    84 
+   44    84         end;
+   45    85 
+   46    85     process type TPminimo(var canalIn: Tcanal; var canalOut :Tcanal; ndatos:Integer; longitud, procesos:Integer);
+   47    85     var i: integer;
+   48    85     var dato:Integer;
+   49    85     var producto:Integer;
+   50    85     begin
+   51    85 
+   52    85         for i:= 1 to 8 do
+   53    89         begin
+   54    89             canalIn ? dato;
+   55    92             producto := ((dato * dato) + producto);
+   56    99         end;
+   57   100         canalOut !  producto;
+   58   103     end;
+   59   104 
+   60   104     process type TPminimoGlobal(var canalIn:Tcanales; var canalOut:Tcanal; longitud, procesos:Integer);
+   61   104     var i: integer;
+   62   104     var dato:Integer;
+   63   104     var producto:Integer;
+   64   104     begin
+   65   104     canalIn[1] ? producto;
+   66   109         for i:= 1 to 8 do
+   67   113         begin
+   68   113             canalIn[i] ? dato;
+   69   118             producto := (dato + producto);
+   70   123         end;
+   71   124         canalOut !  producto;
+   72   127     end;
+   73   128 
+   74   128     type Tprocesses = ARRAY[1..P] of TPminimo;
+   75   128     var pvector: TPvector;
+   76   128     var locales: Tprocesses;
+   77   128     var mglobal: TPminimoGlobal;
+   78   128     var canalIz: Tcanales;
+   79   128     var canDer: Tcanales;
+   80   128     var canalMinino: Tcanal;
+   81   128     var j: integer;
+   82   128     var longitud, procesos : Integer;
+   83   128     begin
+   84   128         ReadLn( longitud );
+   85   131         ReadLn( procesos );
+   86   134         {leer el vektor}            
+   87   134             begin
+   88   134                 for j := 1 to longitud do
+   89   138                     begin
+   90   138                         ReadLn( vektorDatos[j] );
+   91   143                     end;      
+   92   144             end;
+   93   144 
+   94   144             {leer el vektor}            
+   95   144             begin
+   96   144                 for j := 1 to longitud do
+   97   148                     begin
+   98   148                         ReadLn( othervecktordata[j] );
+   99   153                     end;      
+  100   154             end;
+  101   154         begin
+  102   154             cobegin
+  103   155                 pvector(canalMinino, canalIz, longitud, procesos, vektorDatos, othervecktordata);
+  104   165                 for j := 1 to procesos do
+  105   169                 locales[j](canalIz[j], canDer[j], (longitud div procesos), longitud, procesos);
+  106   187                 mglobal(canDer, canalMinino, longitud, procesos);
+  107   195             coend;
+  108   196         end;    
+  109   196     end.
+
+
+
+Symbol table
+
+    name       link      objekt       type         ref      nrm  lev  adr  aux
+
+ 45 _main        44     procedure   notyp           2      True    0  128    0
+ 46 any           0     variable    synch           0      True    1    5    0
+ 47 p            46     constant    integer         0     False    1  200    0
+ 48 n            47     constant    integer         0     False    1 2000    0
+ 49 tcanal       48     type id     channel         1     False    1    3    0
+ 50 tvector      49     type id     array           1     False    1 2000    0
+ 51 tcanales     50     type id     array           2     False    1  600    0
+ 52 vektordato   51     variable    array           1      True    1    5    0
+ 53 otherveckt   52     variable    array           1      True    1 2005    0
+ 54 tpvector     53     type id     process         3      True    1    0    0
+ 55 canalin       0     variable    channel         1     False    2    5    0
+ 56 canalout     55     variable    array           2     False    2    6    0
+ 57 longitud     56     variable    integer         0      True    2    7    0
+ 58 procesos     57     variable    integer         0      True    2    8    0
+ 59 vektor1      58     variable    array           1     False    2    9    0
+ 60 vektor2      59     variable    array           1     False    2   10    0
+ 61 j            60     variable    integer         0      True    2   11    0
+ 62 i            61     variable    integer         0      True    2   12    0
+ 63 vekl         62     variable    integer         0      True    2   13    0
+ 64 producto     63     variable    integer         0      True    2   14    0
+ 65 tpminimo     54     type id     process         4      True    1   85    0
+ 66 canalin       0     variable    channel         1     False    2    5    0
+ 67 canalout     66     variable    channel         1     False    2    6    0
+ 68 ndatos       67     variable    integer         0      True    2    7    0
+ 69 longitud     68     variable    integer         0      True    2    8    0
+ 70 procesos     69     variable    integer         0      True    2    9    0
+ 71 i            70     variable    integer         0      True    2   10    0
+ 72 dato         71     variable    integer         0      True    2   11    0
+ 73 producto     72     variable    integer         0      True    2   12    0
+ 74 tpminimogl   65     type id     process         5      True    1  104    0
+ 75 canalin       0     variable    array           2     False    2    5    0
+ 76 canalout     75     variable    channel         1     False    2    6    0
+ 77 longitud     76     variable    integer         0      True    2    7    0
+ 78 procesos     77     variable    integer         0      True    2    8    0
+ 79 i            78     variable    integer         0      True    2    9    0
+ 80 dato         79     variable    integer         0      True    2   10    0
+ 81 producto     80     variable    integer         0      True    2   11    0
+ 82 tprocesses   74     type id     array           3     False    1  200    0
+ 83 pvector      82     variable    process         3      True    1 4005    0
+ 84 locales      83     variable    array           3      True    1 4006    0
+ 85 mglobal      84     variable    process         5      True    1 4206    0
+ 86 canaliz      85     variable    array           2      True    1 4207    0
+ 87 cander       86     variable    array           2      True    1 4807    0
+ 88 canalminin   87     variable    channel         1      True    1 5407    0
+ 89 j            88     variable    integer         0      True    1 5410    0
+ 90 longitud     89     variable    integer         0      True    1 5411    0
+ 91 procesos     90     variable    integer         0      True    1 5412    0
+
+Generated P-code
+
+    0     ldadr        2        12          ;14
+    1     ldcon.i      0         1          ;15
+    2     store.i      0         0          ;15
+    3     ldadr        2        13          ;15
+    4     ldval.i      2         7          ;16
+    5     ldcon.i      0         2          ;16
+    6     mulop.i      0         0          ;16
+    7     store.i      0         0          ;16
+    8     ldadr        2        11          ;16
+    9     ldcon.i      0         1          ;17
+   10     ldval.i      2        13          ;17
+   11     for1u.i      0        57          ;17
+   12     ldval.i      2        12          ;19
+   13     ldval.i      2         7          ;19
+   14     relle.i      0         0          ;19
+   15     jmpiz        0        34          ;19
+   16     ldval.adr    2         6          ;20
+   17     ldval.i      2        12          ;21
+   18     ixary.i      0         2          ;21
+   19     ldval.adr    2         9          ;21
+   20     ldval.i      2        11          ;21
+   21     ixary.i      0         1          ;21
+   22     rpadr.i      0         0          ;21
+   23     chnwr.i      0         1          ;21
+   24     ldcon.i      0         6          ;22
+   25     wrstr        0         0          ;22
+   26     wrlin        0         0          ;22
+   27     ldval.adr    2         9          ;23
+   28     ldval.i      2        11          ;23
+   29     ixary.i      0         1          ;23
+   30     rpadr.i      0         0          ;23
+   31     wrval.i      0         0          ;23
+   32     wrlin        0         0          ;23
+   33     jmpuc        0        51          ;24
+   34     ldval.adr    2         6          ;26
+   35     ldval.i      2        12          ;27
+   36     ixary.i      0         2          ;27
+   37     ldval.adr    2        10          ;27
+   38     ldval.i      2        11          ;27
+   39     ixary.i      0         1          ;27
+   40     rpadr.i      0         0          ;27
+   41     chnwr.i      0         1          ;27
+   42     ldcon.i      0         6          ;28
+   43     wrstr        0         6          ;28
+   44     wrlin        0         0          ;28
+   45     ldval.adr    2        10          ;29
+   46     ldval.i      2        11          ;29
+   47     ixary.i      0         1          ;29
+   48     rpadr.i      0         0          ;29
+   49     wrval.i      0         0          ;29
+   50     wrlin        0         0          ;29
+   51     ldadr        2        12          ;30
+   52     ldval.i      2        12          ;31
+   53     ldcon.i      0         1          ;31
+   54     addop.i      0         0          ;31
+   55     store.i      0         0          ;31
+   56     for2u.i      0        12          ;31
+   57     ldadr        2        14          ;33
+   58     ldcon.i      0         0          ;36
+   59     store.i      0         0          ;36
+   60     ldadr        2        11          ;36
+   61     ldcon.i      0         1          ;37
+   62     ldval.i      2         7          ;37
+   63     for1u.i      0        78          ;37
+   64     ldadr        2        14          ;38
+   65     ldval.adr    2         9          ;39
+   66     ldval.i      2        11          ;39
+   67     ixary.i      0         1          ;39
+   68     rpadr.i      0         0          ;39
+   69     ldval.adr    2        10          ;39
+   70     ldval.i      2        11          ;39
+   71     ixary.i      0         1          ;39
+   72     rpadr.i      0         0          ;39
+   73     mulop.i      0         0          ;39
+   74     ldval.i      2        14          ;39
+   75     addop.i      0         0          ;39
+   76     store.i      0         0          ;39
+   77     for2u.i      0        64          ;39
+   78     ldval.i      2        14          ;41
+   79     wrval.i      0         0          ;41
+   80     wrlin        0         0          ;41
+   81     ldval.adr    2         5          ;41
+   82     ldadr        2        14          ;42
+   83     chnrd        0         1          ;42
+   84     rproc        1         0          ;42
+   85     ldadr        2        10          ;50
+   86     ldcon.i      0         1          ;52
+   87     ldcon.i      0         8          ;52
+   88     for1u.i      0       100          ;52
+   89     ldval.adr    2         5          ;53
+   90     ldadr        2        11          ;54
+   91     chnrd        0         1          ;54
+   92     ldadr        2        12          ;54
+   93     ldval.i      2        11          ;55
+   94     ldval.i      2        11          ;55
+   95     mulop.i      0         0          ;55
+   96     ldval.i      2        12          ;55
+   97     addop.i      0         0          ;55
+   98     store.i      0         0          ;55
+   99     for2u.i      0        89          ;55
+  100     ldval.adr    2         6          ;56
+  101     ldval.i      2        12          ;57
+  102     chnwr.i      0         1          ;57
+  103     rproc        1         0          ;57
+  104     ldval.adr    2         5          ;64
+  105     ldcon.i      0         1          ;65
+  106     ixary.i      0         2          ;65
+  107     ldadr        2        11          ;65
+  108     chnrd        0         1          ;65
+  109     ldadr        2         9          ;65
+  110     ldcon.i      0         1          ;66
+  111     ldcon.i      0         8          ;66
+  112     for1u.i      0       124          ;66
+  113     ldval.adr    2         5          ;67
+  114     ldval.i      2         9          ;68
+  115     ixary.i      0         2          ;68
+  116     ldadr        2        10          ;68
+  117     chnrd        0         1          ;68
+  118     ldadr        2        11          ;68
+  119     ldval.i      2        10          ;69
+  120     ldval.i      2        11          ;69
+  121     addop.i      0         0          ;69
+  122     store.i      0         0          ;69
+  123     for2u.i      0       113          ;69
+  124     ldval.adr    2         6          ;70
+  125     ldval.i      2        11          ;71
+  126     chnwr.i      0         1          ;71
+  127     rproc        1         0          ;71
+  128     ldadr        1      5411          ;84
+  129     rdinp.i      0         0          ;84
+  130     rdlin        0         0          ;84
+  131     ldadr        1      5412          ;85
+  132     rdinp.i      0         0          ;85
+  133     rdlin        0         0          ;85
+  134     ldadr        1      5410          ;87
+  135     ldcon.i      0         1          ;88
+  136     ldval.i      1      5411          ;88
+  137     for1u.i      0       144          ;88
+  138     ldadr        1         5          ;90
+  139     ldval.i      1      5410          ;90
+  140     ixary.i      0         1          ;90
+  141     rdinp.i      0         0          ;90
+  142     rdlin        0         0          ;90
+  143     for2u.i      0       138          ;90
+  144     ldadr        1      5410          ;95
+  145     ldcon.i      0         1          ;96
+  146     ldval.i      1      5411          ;96
+  147     for1u.i      0       154          ;96
+  148     ldadr        1      2005          ;98
+  149     ldval.i      1      5410          ;98
+  150     ixary.i      0         1          ;98
+  151     rdinp.i      0         0          ;98
+  152     rdlin        0         0          ;98
+  153     for2u.i      0       148          ;98
+  154     cobeg        0         0          ;100
+  155     mkstk        1        54          ;102
+  156     ldadr        1      4005          ;102
+  157     procv        0         0          ;102
+  158     ldadr        1      5407          ;103
+  159     ldadr        1      4207          ;103
+  160     ldval.i      1      5411          ;103
+  161     ldval.i      1      5412          ;103
+  162     ldadr        1         5          ;103
+  163     ldadr        1      2005          ;103
+  164     calls        1        10          ;103
+  165     ldadr        1      5410          ;103
+  166     ldcon.i      0         1          ;104
+  167     ldval.i      1      5412          ;104
+  168     for1u.i      0       187          ;104
+  169     mkstk        1        65          ;104
+  170     ldadr        1      4006          ;104
+  171     ldval.i      1      5410          ;105
+  172     ixary.i      0         3          ;105
+  173     procv        0         0          ;105
+  174     ldadr        1      4207          ;105
+  175     ldval.i      1      5410          ;105
+  176     ixary.i      0         2          ;105
+  177     ldadr        1      4807          ;105
+  178     ldval.i      1      5410          ;105
+  179     ixary.i      0         2          ;105
+  180     ldval.i      1      5411          ;105
+  181     ldval.i      1      5412          ;105
+  182     divop.i      0         0          ;105
+  183     ldval.i      1      5411          ;105
+  184     ldval.i      1      5412          ;105
+  185     calls        1         9          ;105
+  186     for2u.i      0       169          ;105
+  187     mkstk        1        74          ;105
+  188     ldadr        1      4206          ;105
+  189     procv        0         0          ;105
+  190     ldadr        1      4807          ;106
+  191     ldadr        1      5407          ;106
+  192     ldval.i      1      5411          ;106
+  193     ldval.i      1      5412          ;106
+  194     calls        1         8          ;106
+  195     coend        0         0          ;106
+  196     stopx        0         0          ;108

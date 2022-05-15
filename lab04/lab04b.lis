@@ -1,0 +1,432 @@
+- Pascal-FC for IBM PC compatibles - 
+- GNU Compiler Version P5.2.1.5
+
+G L Davies  &  A Burns, University of York
+G Ospina, Escuela Colombiana de Ingenieria Julio Garavito
+
+Compiler listing
+
+    1     0 program lab04b;
+    2     0 
+    3     0 var
+    4     0 mutex: semaphore;
+    5     0 nsucursales, ncajeros, ncuentas, noperaciones, i, v: integer;
+    6     0 cuentas : array[0..999] of Integer;
+    7     0 operaciones : array[0..4999] of Integer;
+    8     0 
+    9     0 canal : array[0..4999] of char;
+   10     0 idoficina : array[0..4999] of Integer;
+   11     0 tipotx : array[0..4999] of char;
+   12     0 operacioncuenta : array[0..4999] of Integer;
+   13     0 cantidad : array[0..4999] of Integer;
+   14     0 txsemaforo: array[0..6000] of semaphore;
+   15     0 
+   16     0 monitor incremento;
+   17     0 export wait, signal;
+   18     0 var gcsem :condition;
+   19     0 sem:boolean;
+   20     0 procedure wait;
+   21     0 begin
+   22     0     if sem then delay(gcsem);
+   23     4     sem:=true;
+   24     7 end;
+   25     8 procedure signal;
+   26     8 begin
+   27     8     if not empty(gcsem) then resume(gcsem)
+   28    14     else sem:=false;
+   29    18 end;
+   30    19 begin
+   31    20     sem:=false;
+   32    23 end;
+   33    24 
+   34    24 
+   35    24 {..................GENERAL.......................}
+   36    24 process type TPrincipal;
+   37    24 begin
+   38    24      
+   39    24     incremento.wait;
+   40    29         WriteLn(cuentas[0]);
+   41    35         WriteLn(cuentas[1]);
+   42    41     incremento.signal;
+   43    46 end;
+   44    47 {..................FIN GENERAL.......................}
+   45    47 
+   46    47 {..................TRANSACIONES.......................}
+   47    47 process type TTransferencias(var xcanal:char; xidoficina:integer; xtipotx:char; xoperacioncuenta, cantidad :integer; vsm, noperaciones:integer);
+   48    47 begin
+   49    47      
+   50    47     {wait(txsemaforo[vsm]);}
+   51    47     incremento.wait;
+   52    52 
+   53    52     {COSIGNAR}  
+   54    52     if xtipotx = 'C' then
+   55    56     begin    
+   56    56         {WriteLn(cuentas[xoperacioncuenta]);}
+   57    56         cuentas[xoperacioncuenta] := cuentas[xoperacioncuenta]+cantidad;
+   58    66         
+   59    66     end
+   60    66     {RETIRAR}
+   61    66     else if xtipotx = 'R' then
+   62    71     begin
+   63    71      {WriteLn(cuentas[xoperacioncuenta]);}
+   64    71         cuentas[xoperacioncuenta] := cuentas[xoperacioncuenta]-cantidad;
+   65    81 
+   66    81     end
+   67    81     {SALDO}
+   68    81     else if xtipotx = 'S' then
+   69    86     begin
+   70    86         {WriteLn(cuentas[xoperacioncuenta]);}
+   71    86     end;
+   72    86         {signal(txsemaforo[vsm]);}
+   73    86         incremento.signal;
+   74    91     if vsm = noperaciones then
+   75    95     begin
+   76    95         incremento.signal;
+   77   100     end;
+   78   100 end;
+   79   101 {..................FIN TRANSACIONES.......................}
+   80   101 var pprincipal: TPrincipal;
+   81   101 
+   82   101 type TprocessestX = ARRAY[0..2000] of TTransferencias;
+   83   101 var ptx: TprocessestX;   
+   84   101 
+   85   101 begin
+   86   102         ReadLn( nsucursales );
+   87   105         ReadLn( ncajeros );
+   88   108         ReadLn( ncuentas );
+   89   111 
+   90   111         for i := 0 to (ncuentas-1) do
+   91   117         begin
+   92   117             ReadLn( cuentas[i] );
+   93   122         end;
+   94   123 
+   95   123         ReadLn( noperaciones );
+   96   126 
+   97   126         for i := 0 to (noperaciones-1) do
+   98   132         begin
+   99   132             Read( canal[i] ); 
+  100   136             Read( idoficina[i] );
+  101   140             Read( tipotx[i] );
+  102   144             
+  103   144           if (((canal[i]='S') and (tipotx[i]='C')) or ((canal[i]='S') and (tipotx[i]='R')) or ((canal[i]='C') and (tipotx[i]='R')) ) then
+  104   186             begin
+  105   186                 Read( operacioncuenta[i] );
+  106   190                 ReadLn( cantidad[i] );
+  107   195             end
+  108   195             else
+  109   195             begin
+  110   196                 ReadLn( operacioncuenta[i] );
+  111   201           end;
+  112   201         end;
+  113   202 
+  114   202         {initial(mutex,0);}
+  115   202         {for i := 0 to (noperaciones-1) do
+  116   202            begin
+  117   202               if i>=0 then
+  118   202                 begin 
+  119   202                     initial(txsemaforo[i],1);
+  120   202                 end
+  121   202                 else
+  122   202                 begin
+  123   202                     initial(txsemaforo[i],1);
+  124   202                 end;
+  125   202             end;}
+  126   202             
+  127   202 
+  128   202             cobegin
+  129   203                 pprincipal;
+  130   207                     for i := 0 to (noperaciones-1) do
+  131   213                         ptx[i](canal[i],idoficina[i],tipotx[i],(operacioncuenta[i]-1),cantidad[i], i, (noperaciones-1));        
+  132   245             coend;       
+  133   246 end.
+
+
+
+Symbol table
+
+    name       link      objekt       type         ref      nrm  lev  adr  aux
+
+ 45 _main        44     procedure   notyp           2      True    0  101    0
+ 46 any           0     variable    synch           0      True    1    5    0
+ 47 mutex        46     variable    semaphore       0      True    1    5    0
+ 48 nsucursale   47     variable    integer         0      True    1    6    0
+ 49 ncajeros     48     variable    integer         0      True    1    7    0
+ 50 ncuentas     49     variable    integer         0      True    1    8    0
+ 51 noperacion   50     variable    integer         0      True    1    9    0
+ 52 i            51     variable    integer         0      True    1   10    0
+ 53 v            52     variable    integer         0      True    1   11    0
+ 54 cuentas      53     variable    array           1      True    1   12    0
+ 55 operacione   54     variable    array           2      True    1 1012    0
+ 56 canal        55     variable    array           3      True    1 6012    0
+ 57 idoficina    56     variable    array           4      True    111012    0
+ 58 tipotx       57     variable    array           5      True    116012    0
+ 59 operacionc   58     variable    array           6      True    121012    0
+ 60 cantidad     59     variable    array           7      True    126012    0
+ 61 txsemaforo   60     variable    array           8      True    131012    0
+ 62 incremento   61     variable    monvar          3      True    137013   19
+ 63 gcsem         0     variable    condition       0      True    137015    0
+ 64 sem          63     variable    boolean         0      True    137016    0
+ 65 wait         64     monproc     notyp           4      True    2    0    0
+ 66 signal       65     monproc     notyp           5      True    2    8    0
+ 67 tprincipal   62     type id     process         6      True    1   24    0
+ 68 ttransfere   67     type id     process         7      True    1   47    0
+ 69 xcanal        0     variable    char            0     False    2    5    0
+ 70 xidoficina   69     variable    integer         0      True    2    6    0
+ 71 xtipotx      70     variable    char            0      True    2    7    0
+ 72 xoperacion   71     variable    integer         0      True    2    8    0
+ 73 cantidad     72     variable    integer         0      True    2    9    0
+ 74 vsm          73     variable    integer         0      True    2   10    0
+ 75 noperacion   74     variable    integer         0      True    2   11    0
+ 76 pprincipal   68     variable    process         6      True    137017    0
+ 77 tprocesses   76     type id     array           9     False    1 2001    0
+ 78 ptx          77     variable    array           9      True    137018    0
+
+Generated P-code
+
+    0     ldval.b      1     37016          ;22
+    1     jmpiz        0         4          ;22
+    2     ldadr        1     37015          ;22
+    3     delay        0         0          ;22
+    4     ldadr        1     37016          ;22
+    5     ldcon.b      0         1          ;23
+    6     store.b      0         0          ;23
+    7     rproc        0         0          ;23
+    8     ldadr        1     37015          ;27
+    9     stfun.b      0        20          ;27
+   10     notop.b      0         0          ;27
+   11     jmpiz        0        15          ;27
+   12     ldadr        1     37015          ;27
+   13     resum        0         0          ;27
+   14     jmpuc        0        18          ;27
+   15     ldadr        1     37016          ;28
+   16     ldcon.b      0         0          ;28
+   17     store.b      0         0          ;28
+   18     rproc        0         0          ;28
+   19     prsel        0         0          ;29
+   20     ldadr        1     37016          ;30
+   21     ldcon.b      0         0          ;31
+   22     store.b      0         0          ;31
+   23     mretn        0         0          ;31
+   24     ldadr        1     37013          ;39
+   25     enmon        0         0          ;39
+   26     mkstk        0        65          ;39
+   27     calls        0         4          ;39
+   28     exmon        0         0          ;39
+   29     ldadr        1        12          ;40
+   30     ldcon.i      0         0          ;40
+   31     ixary.i      0         1          ;40
+   32     rpadr.i      0         0          ;40
+   33     wrval.i      0         0          ;40
+   34     wrlin        0         0          ;40
+   35     ldadr        1        12          ;41
+   36     ldcon.i      0         1          ;41
+   37     ixary.i      0         1          ;41
+   38     rpadr.i      0         0          ;41
+   39     wrval.i      0         0          ;41
+   40     wrlin        0         0          ;41
+   41     ldadr        1     37013          ;42
+   42     enmon        0         0          ;42
+   43     mkstk        0        66          ;42
+   44     calls        0         4          ;42
+   45     exmon        0         0          ;42
+   46     rproc        1         0          ;42
+   47     ldadr        1     37013          ;51
+   48     enmon        0         0          ;51
+   49     mkstk        0        65          ;51
+   50     calls        0         4          ;51
+   51     exmon        0         0          ;51
+   52     ldval.c      2         7          ;54
+   53     ldcon.c      0        67          ;54
+   54     releq.c      0         0          ;54
+   55     jmpiz        0        67          ;54
+   56     ldadr        1        12          ;55
+   57     ldval.i      2         8          ;57
+   58     ixary.i      0         1          ;57
+   59     ldadr        1        12          ;57
+   60     ldval.i      2         8          ;57
+   61     ixary.i      0         1          ;57
+   62     rpadr.i      0         0          ;57
+   63     ldval.i      2         9          ;57
+   64     addop.i      0         0          ;57
+   65     store.i      0         0          ;57
+   66     jmpuc        0        86          ;59
+   67     ldval.c      2         7          ;61
+   68     ldcon.c      0        82          ;61
+   69     releq.c      0         0          ;61
+   70     jmpiz        0        82          ;61
+   71     ldadr        1        12          ;62
+   72     ldval.i      2         8          ;64
+   73     ixary.i      0         1          ;64
+   74     ldadr        1        12          ;64
+   75     ldval.i      2         8          ;64
+   76     ixary.i      0         1          ;64
+   77     rpadr.i      0         0          ;64
+   78     ldval.i      2         9          ;64
+   79     subop.i      0         0          ;64
+   80     store.i      0         0          ;64
+   81     jmpuc        0        86          ;66
+   82     ldval.c      2         7          ;68
+   83     ldcon.c      0        83          ;68
+   84     releq.c      0         0          ;68
+   85     jmpiz        0        86          ;68
+   86     ldadr        1     37013          ;73
+   87     enmon        0         0          ;73
+   88     mkstk        0        66          ;73
+   89     calls        0         4          ;73
+   90     exmon        0         0          ;73
+   91     ldval.i      2        10          ;74
+   92     ldval.i      2        11          ;74
+   93     releq.i      0         0          ;74
+   94     jmpiz        0       100          ;74
+   95     ldadr        1     37013          ;76
+   96     enmon        0         0          ;76
+   97     mkstk        0        66          ;76
+   98     calls        0         4          ;76
+   99     exmon        0         0          ;76
+  100     rproc        1         0          ;77
+  101     mexec        0        20          ;83
+  102     ldadr        1         6          ;86
+  103     rdinp.i      0         0          ;86
+  104     rdlin        0         0          ;86
+  105     ldadr        1         7          ;87
+  106     rdinp.i      0         0          ;87
+  107     rdlin        0         0          ;87
+  108     ldadr        1         8          ;88
+  109     rdinp.i      0         0          ;88
+  110     rdlin        0         0          ;88
+  111     ldadr        1        10          ;88
+  112     ldcon.i      0         0          ;90
+  113     ldval.i      1         8          ;90
+  114     ldcon.i      0         1          ;90
+  115     subop.i      0         0          ;90
+  116     for1u.i      0       123          ;90
+  117     ldadr        1        12          ;92
+  118     ldval.i      1        10          ;92
+  119     ixary.i      0         1          ;92
+  120     rdinp.i      0         0          ;92
+  121     rdlin        0         0          ;92
+  122     for2u.i      0       117          ;92
+  123     ldadr        1         9          ;95
+  124     rdinp.i      0         0          ;95
+  125     rdlin        0         0          ;95
+  126     ldadr        1        10          ;95
+  127     ldcon.i      0         0          ;97
+  128     ldval.i      1         9          ;97
+  129     ldcon.i      0         1          ;97
+  130     subop.i      0         0          ;97
+  131     for1u.i      0       202          ;97
+  132     ldadr        1      6012          ;99
+  133     ldval.i      1        10          ;99
+  134     ixary.i      0         3          ;99
+  135     rdinp.c      0         0          ;99
+  136     ldadr        1     11012          ;100
+  137     ldval.i      1        10          ;100
+  138     ixary.i      0         4          ;100
+  139     rdinp.i      0         0          ;100
+  140     ldadr        1     16012          ;101
+  141     ldval.i      1        10          ;101
+  142     ixary.i      0         5          ;101
+  143     rdinp.c      0         0          ;101
+  144     ldadr        1      6012          ;103
+  145     ldval.i      1        10          ;103
+  146     ixary.i      0         3          ;103
+  147     rpadr.c      0         0          ;103
+  148     ldcon.c      0        83          ;103
+  149     releq.c      0         0          ;103
+  150     ldadr        1     16012          ;103
+  151     ldval.i      1        10          ;103
+  152     ixary.i      0         5          ;103
+  153     rpadr.c      0         0          ;103
+  154     ldcon.c      0        67          ;103
+  155     releq.c      0         0          ;103
+  156     andop.b      0         0          ;103
+  157     ldadr        1      6012          ;103
+  158     ldval.i      1        10          ;103
+  159     ixary.i      0         3          ;103
+  160     rpadr.c      0         0          ;103
+  161     ldcon.c      0        83          ;103
+  162     releq.c      0         0          ;103
+  163     ldadr        1     16012          ;103
+  164     ldval.i      1        10          ;103
+  165     ixary.i      0         5          ;103
+  166     rpadr.c      0         0          ;103
+  167     ldcon.c      0        82          ;103
+  168     releq.c      0         0          ;103
+  169     andop.b      0         0          ;103
+  170     iorop.b      0         0          ;103
+  171     ldadr        1      6012          ;103
+  172     ldval.i      1        10          ;103
+  173     ixary.i      0         3          ;103
+  174     rpadr.c      0         0          ;103
+  175     ldcon.c      0        67          ;103
+  176     releq.c      0         0          ;103
+  177     ldadr        1     16012          ;103
+  178     ldval.i      1        10          ;103
+  179     ixary.i      0         5          ;103
+  180     rpadr.c      0         0          ;103
+  181     ldcon.c      0        82          ;103
+  182     releq.c      0         0          ;103
+  183     andop.b      0         0          ;103
+  184     iorop.b      0         0          ;103
+  185     jmpiz        0       196          ;103
+  186     ldadr        1     21012          ;105
+  187     ldval.i      1        10          ;105
+  188     ixary.i      0         6          ;105
+  189     rdinp.i      0         0          ;105
+  190     ldadr        1     26012          ;106
+  191     ldval.i      1        10          ;106
+  192     ixary.i      0         7          ;106
+  193     rdinp.i      0         0          ;106
+  194     rdlin        0         0          ;106
+  195     jmpuc        0       201          ;107
+  196     ldadr        1     21012          ;110
+  197     ldval.i      1        10          ;110
+  198     ixary.i      0         6          ;110
+  199     rdinp.i      0         0          ;110
+  200     rdlin        0         0          ;110
+  201     for2u.i      0       132          ;111
+  202     cobeg        0         0          ;112
+  203     mkstk        1        67          ;128
+  204     ldadr        1     37017          ;128
+  205     procv        0         0          ;128
+  206     calls        1         4          ;128
+  207     ldadr        1        10          ;129
+  208     ldcon.i      0         0          ;130
+  209     ldval.i      1         9          ;130
+  210     ldcon.i      0         1          ;130
+  211     subop.i      0         0          ;130
+  212     for1u.i      0       245          ;130
+  213     mkstk        1        68          ;130
+  214     ldadr        1     37018          ;130
+  215     ldval.i      1        10          ;131
+  216     ixary.i      0         9          ;131
+  217     procv        0         0          ;131
+  218     ldadr        1      6012          ;131
+  219     ldval.i      1        10          ;131
+  220     ixary.i      0         3          ;131
+  221     ldadr        1     11012          ;131
+  222     ldval.i      1        10          ;131
+  223     ixary.i      0         4          ;131
+  224     rpadr.i      0         0          ;131
+  225     ldadr        1     16012          ;131
+  226     ldval.i      1        10          ;131
+  227     ixary.i      0         5          ;131
+  228     rpadr.c      0         0          ;131
+  229     ldadr        1     21012          ;131
+  230     ldval.i      1        10          ;131
+  231     ixary.i      0         6          ;131
+  232     rpadr.i      0         0          ;131
+  233     ldcon.i      0         1          ;131
+  234     subop.i      0         0          ;131
+  235     ldadr        1     26012          ;131
+  236     ldval.i      1        10          ;131
+  237     ixary.i      0         7          ;131
+  238     rpadr.i      0         0          ;131
+  239     ldval.i      1        10          ;131
+  240     ldval.i      1         9          ;131
+  241     ldcon.i      0         1          ;131
+  242     subop.i      0         0          ;131
+  243     calls        1        11          ;131
+  244     for2u.i      0       213          ;131
+  245     coend        0         0          ;131
+  246     stopx        0         0          ;132

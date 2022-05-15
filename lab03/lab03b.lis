@@ -1,0 +1,311 @@
+- Pascal-FC for IBM PC compatibles - 
+- GNU Compiler Version P5.2.1.5
+
+G L Davies  &  A Burns, University of York
+G Ospina, Escuela Colombiana de Ingenieria Julio Garavito
+
+Compiler listing
+
+    1     0 program lab03b;
+    2     0 
+    3     0 const P = 200;
+    4     0 const N = 2000;
+    5     0 type Tcanal = channel of Integer;
+    6     0 type Tvector = array[1..N] of Integer;
+    7     0 Tcanales = array[1..2000] of Tcanal;
+    8     0 var vecktordata: Tvector;
+    9     0 var othervecktordata: Tvector;
+   10     0 
+   11     0     process type TPvector(var canalIn: Tcanal; var canalOut, outvektwo: Tcanales; lengthv, pointprocesses:Integer; var vektor1, vektor2: Tvector);
+   12     0     var j, result, test : Integer;
+   13     0         begin
+   14     0             
+   15     0             begin
+   16     0                 for j := 1 to lengthv do
+   17     4                 begin
+   18     4                     
+   19     4                     canalOut[(j mod pointprocesses) + 1] ! vektor1[j];
+   20    16                     outvektwo[(j mod pointprocesses) + 1] ! vektor2[j];
+   21    28                     
+   22    28                 end;      
+   23    29             end;
+   24    29             canalIn ? result;
+   25    32             WriteLn(result);
+   26    35         end;
+   27    36 
+   28    36     process type TPProductPoint(var canalIn, vsndin: Tcanal; var canalOut :Tcanal; ndatos:Integer);
+   29    36     var i: integer;
+   30    36     var dato:Integer;
+   31    36     var seconddato:Integer;
+   32    36     var producto:Integer;
+   33    36     
+   34    36     begin
+   35    36     producto := 0;
+   36    39     for i:= 1 to ndatos do
+   37    43         begin
+   38    43             canalIn ? dato;
+   39    46             vsndin ? seconddato;
+   40    49             producto := (dato * seconddato) + producto;
+   41    56         end;
+   42    57         canalOut !  producto;
+   43    60     end;
+   44    61 
+   45    61 
+   46    61     process type TPGlobalProductPoint(var canalIn:Tcanales; var canalOut:Tcanal ; pointprocesses:Integer);
+   47    61     var i: integer;
+   48    61     var dato:Integer;
+   49    61     var seconddato:Integer;
+   50    61     var producto:Integer;
+   51    61     begin
+   52    61         for i:= 1 to pointprocesses do
+   53    65         begin
+   54    65             canalIn[i] ? dato;
+   55    70             producto := (dato + producto);
+   56    75         end;
+   57    76         canalOut !  producto;
+   58    79     end;
+   59    80 
+   60    80 
+   61    80     type Tprocesses = ARRAY[1..P] of TPProductPoint;
+   62    80     var pvector: TPvector;
+   63    80     var locales: Tprocesses;
+   64    80     var mglobal: TPGlobalProductPoint;
+   65    80     var leftchannel, secondleft: Tcanales;
+   66    80     var rightchannel: Tcanales;
+   67    80     var canalproduct: Tcanal;
+   68    80 
+   69    80     var j: integer;
+   70    80     var lengthv, pointprocesses : Integer;
+   71    80     begin
+   72    80         ReadLn( lengthv );
+   73    83         ReadLn( pointprocesses );
+   74    86                    
+   75    86         begin
+   76    86           for j := 1 to lengthv do
+   77    90             begin
+   78    90                 ReadLn( vecktordata[j] );
+   79    95             end;      
+   80    96         end;
+   81    96         begin
+   82    96           for j := 1 to lengthv do
+   83   100             begin
+   84   100                 ReadLn( othervecktordata[j] );
+   85   105             end;      
+   86   106         end;
+   87   106         begin
+   88   106             cobegin
+   89   107                 pvector(canalproduct, leftchannel, secondleft, lengthv, pointprocesses, vecktordata, othervecktordata);
+   90   118                     for j := 1 to pointprocesses do
+   91   122                         locales[j](leftchannel[j], secondleft[j],  rightchannel[j], (lengthv div pointprocesses));
+   92   141                 mglobal(rightchannel, canalproduct, pointprocesses);
+   93   148             coend;
+   94   149         end;    
+   95   149     end.
+
+
+
+Symbol table
+
+    name       link      objekt       type         ref      nrm  lev  adr  aux
+
+ 45 _main        44     procedure   notyp           2      True    0   80    0
+ 46 any           0     variable    synch           0      True    1    5    0
+ 47 p            46     constant    integer         0     False    1  200    0
+ 48 n            47     constant    integer         0     False    1 2000    0
+ 49 tcanal       48     type id     channel         1     False    1    3    0
+ 50 tvector      49     type id     array           1     False    1 2000    0
+ 51 tcanales     50     type id     array           2     False    1 6000    0
+ 52 vecktordat   51     variable    array           1      True    1    5    0
+ 53 otherveckt   52     variable    array           1      True    1 2005    0
+ 54 tpvector     53     type id     process         3      True    1    0    0
+ 55 canalin       0     variable    channel         1     False    2    5    0
+ 56 canalout     55     variable    array           2     False    2    6    0
+ 57 outvektwo    56     variable    array           2     False    2    7    0
+ 58 lengthv      57     variable    integer         0      True    2    8    0
+ 59 pointproce   58     variable    integer         0      True    2    9    0
+ 60 vektor1      59     variable    array           1     False    2   10    0
+ 61 vektor2      60     variable    array           1     False    2   11    0
+ 62 j            61     variable    integer         0      True    2   12    0
+ 63 result       62     variable    integer         0      True    2   13    0
+ 64 test         63     variable    integer         0      True    2   14    0
+ 65 tpproductp   54     type id     process         4      True    1   36    0
+ 66 canalin       0     variable    channel         1     False    2    5    0
+ 67 vsndin       66     variable    channel         1     False    2    6    0
+ 68 canalout     67     variable    channel         1     False    2    7    0
+ 69 ndatos       68     variable    integer         0      True    2    8    0
+ 70 i            69     variable    integer         0      True    2    9    0
+ 71 dato         70     variable    integer         0      True    2   10    0
+ 72 seconddato   71     variable    integer         0      True    2   11    0
+ 73 producto     72     variable    integer         0      True    2   12    0
+ 74 tpglobalpr   65     type id     process         5      True    1   61    0
+ 75 canalin       0     variable    array           2     False    2    5    0
+ 76 canalout     75     variable    channel         1     False    2    6    0
+ 77 pointproce   76     variable    integer         0      True    2    7    0
+ 78 i            77     variable    integer         0      True    2    8    0
+ 79 dato         78     variable    integer         0      True    2    9    0
+ 80 seconddato   79     variable    integer         0      True    2   10    0
+ 81 producto     80     variable    integer         0      True    2   11    0
+ 82 tprocesses   74     type id     array           3     False    1  200    0
+ 83 pvector      82     variable    process         3      True    1 4005    0
+ 84 locales      83     variable    array           3      True    1 4006    0
+ 85 mglobal      84     variable    process         5      True    1 4206    0
+ 86 leftchanne   85     variable    array           2      True    1 4207    0
+ 87 secondleft   86     variable    array           2      True    110207    0
+ 88 rightchann   87     variable    array           2      True    116207    0
+ 89 canalprodu   88     variable    channel         1      True    122207    0
+ 90 j            89     variable    integer         0      True    122210    0
+ 91 lengthv      90     variable    integer         0      True    122211    0
+ 92 pointproce   91     variable    integer         0      True    122212    0
+
+Generated P-code
+
+    0     ldadr        2        12          ;15
+    1     ldcon.i      0         1          ;16
+    2     ldval.i      2         8          ;16
+    3     for1u.i      0        29          ;16
+    4     ldval.adr    2         6          ;17
+    5     ldval.i      2        12          ;19
+    6     ldval.i      2         9          ;19
+    7     modop.i      0         0          ;19
+    8     ldcon.i      0         1          ;19
+    9     addop.i      0         0          ;19
+   10     ixary.i      0         2          ;19
+   11     ldval.adr    2        10          ;19
+   12     ldval.i      2        12          ;19
+   13     ixary.i      0         1          ;19
+   14     rpadr.i      0         0          ;19
+   15     chnwr.i      0         1          ;19
+   16     ldval.adr    2         7          ;19
+   17     ldval.i      2        12          ;20
+   18     ldval.i      2         9          ;20
+   19     modop.i      0         0          ;20
+   20     ldcon.i      0         1          ;20
+   21     addop.i      0         0          ;20
+   22     ixary.i      0         2          ;20
+   23     ldval.adr    2        11          ;20
+   24     ldval.i      2        12          ;20
+   25     ixary.i      0         1          ;20
+   26     rpadr.i      0         0          ;20
+   27     chnwr.i      0         1          ;20
+   28     for2u.i      0         4          ;20
+   29     ldval.adr    2         5          ;23
+   30     ldadr        2        13          ;24
+   31     chnrd        0         1          ;24
+   32     ldval.i      2        13          ;25
+   33     wrval.i      0         0          ;25
+   34     wrlin        0         0          ;25
+   35     rproc        1         0          ;25
+   36     ldadr        2        12          ;34
+   37     ldcon.i      0         0          ;35
+   38     store.i      0         0          ;35
+   39     ldadr        2         9          ;35
+   40     ldcon.i      0         1          ;36
+   41     ldval.i      2         8          ;36
+   42     for1u.i      0        57          ;36
+   43     ldval.adr    2         5          ;37
+   44     ldadr        2        10          ;38
+   45     chnrd        0         1          ;38
+   46     ldval.adr    2         6          ;38
+   47     ldadr        2        11          ;39
+   48     chnrd        0         1          ;39
+   49     ldadr        2        12          ;39
+   50     ldval.i      2        10          ;40
+   51     ldval.i      2        11          ;40
+   52     mulop.i      0         0          ;40
+   53     ldval.i      2        12          ;40
+   54     addop.i      0         0          ;40
+   55     store.i      0         0          ;40
+   56     for2u.i      0        43          ;40
+   57     ldval.adr    2         7          ;41
+   58     ldval.i      2        12          ;42
+   59     chnwr.i      0         1          ;42
+   60     rproc        1         0          ;42
+   61     ldadr        2         8          ;51
+   62     ldcon.i      0         1          ;52
+   63     ldval.i      2         7          ;52
+   64     for1u.i      0        76          ;52
+   65     ldval.adr    2         5          ;53
+   66     ldval.i      2         8          ;54
+   67     ixary.i      0         2          ;54
+   68     ldadr        2         9          ;54
+   69     chnrd        0         1          ;54
+   70     ldadr        2        11          ;54
+   71     ldval.i      2         9          ;55
+   72     ldval.i      2        11          ;55
+   73     addop.i      0         0          ;55
+   74     store.i      0         0          ;55
+   75     for2u.i      0        65          ;55
+   76     ldval.adr    2         6          ;56
+   77     ldval.i      2        11          ;57
+   78     chnwr.i      0         1          ;57
+   79     rproc        1         0          ;57
+   80     ldadr        1     22211          ;72
+   81     rdinp.i      0         0          ;72
+   82     rdlin        0         0          ;72
+   83     ldadr        1     22212          ;73
+   84     rdinp.i      0         0          ;73
+   85     rdlin        0         0          ;73
+   86     ldadr        1     22210          ;75
+   87     ldcon.i      0         1          ;76
+   88     ldval.i      1     22211          ;76
+   89     for1u.i      0        96          ;76
+   90     ldadr        1         5          ;78
+   91     ldval.i      1     22210          ;78
+   92     ixary.i      0         1          ;78
+   93     rdinp.i      0         0          ;78
+   94     rdlin        0         0          ;78
+   95     for2u.i      0        90          ;78
+   96     ldadr        1     22210          ;81
+   97     ldcon.i      0         1          ;82
+   98     ldval.i      1     22211          ;82
+   99     for1u.i      0       106          ;82
+  100     ldadr        1      2005          ;84
+  101     ldval.i      1     22210          ;84
+  102     ixary.i      0         1          ;84
+  103     rdinp.i      0         0          ;84
+  104     rdlin        0         0          ;84
+  105     for2u.i      0       100          ;84
+  106     cobeg        0         0          ;86
+  107     mkstk        1        54          ;88
+  108     ldadr        1      4005          ;88
+  109     procv        0         0          ;88
+  110     ldadr        1     22207          ;89
+  111     ldadr        1      4207          ;89
+  112     ldadr        1     10207          ;89
+  113     ldval.i      1     22211          ;89
+  114     ldval.i      1     22212          ;89
+  115     ldadr        1         5          ;89
+  116     ldadr        1      2005          ;89
+  117     calls        1        11          ;89
+  118     ldadr        1     22210          ;89
+  119     ldcon.i      0         1          ;90
+  120     ldval.i      1     22212          ;90
+  121     for1u.i      0       141          ;90
+  122     mkstk        1        65          ;90
+  123     ldadr        1      4006          ;90
+  124     ldval.i      1     22210          ;91
+  125     ixary.i      0         3          ;91
+  126     procv        0         0          ;91
+  127     ldadr        1      4207          ;91
+  128     ldval.i      1     22210          ;91
+  129     ixary.i      0         2          ;91
+  130     ldadr        1     10207          ;91
+  131     ldval.i      1     22210          ;91
+  132     ixary.i      0         2          ;91
+  133     ldadr        1     16207          ;91
+  134     ldval.i      1     22210          ;91
+  135     ixary.i      0         2          ;91
+  136     ldval.i      1     22211          ;91
+  137     ldval.i      1     22212          ;91
+  138     divop.i      0         0          ;91
+  139     calls        1         8          ;91
+  140     for2u.i      0       122          ;91
+  141     mkstk        1        74          ;91
+  142     ldadr        1      4206          ;91
+  143     procv        0         0          ;91
+  144     ldadr        1     16207          ;92
+  145     ldadr        1     22207          ;92
+  146     ldval.i      1     22212          ;92
+  147     calls        1         7          ;92
+  148     coend        0         0          ;92
+  149     stopx        0         0          ;94

@@ -1,0 +1,164 @@
+- Pascal-FC for IBM PC compatibles - 
+- GNU Compiler Version P5.2.1.5
+
+G L Davies  &  A Burns, University of York
+G Ospina, Escuela Colombiana de Ingenieria Julio Garavito
+
+Compiler listing
+
+    1     0 program lab01a;
+    2     0 var pasajeros, vuelos, i : Integer;
+    3     0 var paises: array[0..4] of Integer;
+    4     0 begin
+    5     0     
+    6     0       ReadLn( paises[0] );
+    7     5     
+    8     5       ReadLn( paises[1] );
+    9    10     
+   10    10       ReadLn( paises[2] );
+   11    15     
+   12    15       ReadLn( paises[3] );
+   13    20     
+   14    20       ReadLn( paises[4] );
+   15    25 
+   16    25     pasajeros:= 15;
+   17    28     WriteLn(pasajeros);
+   18    31     begin
+   19    31     vuelos :=0;
+   20    34         for i := 0 to 4 do
+   21    38         begin
+   22    38            if paises[i] mod pasajeros = 0 then
+   23    47                 begin
+   24    47                     WriteLn(Trunc(paises[i]/pasajeros));
+   25    58                     vuelos := vuelos + (Trunc(paises[i]/pasajeros))
+   26    69                 end
+   27    71             else 
+   28    71                 begin
+   29    72                     WriteLn(Trunc(paises[i]/pasajeros)+1);
+   30    85                     vuelos := vuelos + (Trunc(paises[i]/pasajeros)+1)
+   31    98                 end;
+   32   100         end;        
+   33   101     end;
+   34   101     WriteLn(vuelos);
+   35   104  end.
+
+
+
+Symbol table
+
+    name       link      objekt       type         ref      nrm  lev  adr  aux
+
+ 45 _main        44     procedure   notyp           2      True    0    0    0
+ 46 any           0     variable    synch           0      True    1    5    0
+ 47 pasajeros    46     variable    integer         0      True    1    5    0
+ 48 vuelos       47     variable    integer         0      True    1    6    0
+ 49 i            48     variable    integer         0      True    1    7    0
+ 50 paises       49     variable    array           1      True    1    8    0
+
+Generated P-code
+
+    0     ldadr        1         8          ;6
+    1     ldcon.i      0         0          ;6
+    2     ixary.i      0         1          ;6
+    3     rdinp.i      0         0          ;6
+    4     rdlin        0         0          ;6
+    5     ldadr        1         8          ;8
+    6     ldcon.i      0         1          ;8
+    7     ixary.i      0         1          ;8
+    8     rdinp.i      0         0          ;8
+    9     rdlin        0         0          ;8
+   10     ldadr        1         8          ;10
+   11     ldcon.i      0         2          ;10
+   12     ixary.i      0         1          ;10
+   13     rdinp.i      0         0          ;10
+   14     rdlin        0         0          ;10
+   15     ldadr        1         8          ;12
+   16     ldcon.i      0         3          ;12
+   17     ixary.i      0         1          ;12
+   18     rdinp.i      0         0          ;12
+   19     rdlin        0         0          ;12
+   20     ldadr        1         8          ;14
+   21     ldcon.i      0         4          ;14
+   22     ixary.i      0         1          ;14
+   23     rdinp.i      0         0          ;14
+   24     rdlin        0         0          ;14
+   25     ldadr        1         5          ;14
+   26     ldcon.i      0        15          ;16
+   27     store.i      0         0          ;16
+   28     ldval.i      1         5          ;17
+   29     wrval.i      0         0          ;17
+   30     wrlin        0         0          ;17
+   31     ldadr        1         6          ;18
+   32     ldcon.i      0         0          ;19
+   33     store.i      0         0          ;19
+   34     ldadr        1         7          ;19
+   35     ldcon.i      0         0          ;20
+   36     ldcon.i      0         4          ;20
+   37     for1u.i      0       101          ;20
+   38     ldadr        1         8          ;22
+   39     ldval.i      1         7          ;22
+   40     ixary.i      0         1          ;22
+   41     rpadr.i      0         0          ;22
+   42     ldval.i      1         5          ;22
+   43     modop.i      0         0          ;22
+   44     ldcon.i      0         0          ;22
+   45     releq.i      0         0          ;22
+   46     jmpiz        0        72          ;22
+   47     ldadr        1         8          ;24
+   48     ldval.i      1         7          ;24
+   49     ixary.i      0         1          ;24
+   50     rpadr.i      0         0          ;24
+   51     ldval.i      1         5          ;24
+   52     float        0         0          ;24
+   53     float        0         1          ;24
+   54     divop.r      0         0          ;24
+   55     stfun.i      0        10          ;24
+   56     wrval.i      0         0          ;24
+   57     wrlin        0         0          ;24
+   58     ldadr        1         6          ;24
+   59     ldval.i      1         6          ;25
+   60     ldadr        1         8          ;25
+   61     ldval.i      1         7          ;25
+   62     ixary.i      0         1          ;25
+   63     rpadr.i      0         0          ;25
+   64     ldval.i      1         5          ;25
+   65     float        0         0          ;25
+   66     float        0         1          ;25
+   67     divop.r      0         0          ;25
+   68     stfun.i      0        10          ;25
+   69     addop.i      0         0          ;25
+   70     store.i      0         0          ;25
+   71     jmpuc        0       100          ;26
+   72     ldadr        1         8          ;29
+   73     ldval.i      1         7          ;29
+   74     ixary.i      0         1          ;29
+   75     rpadr.i      0         0          ;29
+   76     ldval.i      1         5          ;29
+   77     float        0         0          ;29
+   78     float        0         1          ;29
+   79     divop.r      0         0          ;29
+   80     stfun.i      0        10          ;29
+   81     ldcon.i      0         1          ;29
+   82     addop.i      0         0          ;29
+   83     wrval.i      0         0          ;29
+   84     wrlin        0         0          ;29
+   85     ldadr        1         6          ;29
+   86     ldval.i      1         6          ;30
+   87     ldadr        1         8          ;30
+   88     ldval.i      1         7          ;30
+   89     ixary.i      0         1          ;30
+   90     rpadr.i      0         0          ;30
+   91     ldval.i      1         5          ;30
+   92     float        0         0          ;30
+   93     float        0         1          ;30
+   94     divop.r      0         0          ;30
+   95     stfun.i      0        10          ;30
+   96     ldcon.i      0         1          ;30
+   97     addop.i      0         0          ;30
+   98     addop.i      0         0          ;30
+   99     store.i      0         0          ;30
+  100     for2u.i      0        38          ;31
+  101     ldval.i      1         6          ;34
+  102     wrval.i      0         0          ;34
+  103     wrlin        0         0          ;34
+  104     stopx        0         0          ;34

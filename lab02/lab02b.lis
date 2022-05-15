@@ -1,0 +1,205 @@
+- Pascal-FC for IBM PC compatibles - 
+- GNU Compiler Version P5.2.1.5
+
+G L Davies  &  A Burns, University of York
+G Ospina, Escuela Colombiana de Ingenieria Julio Garavito
+
+Compiler listing
+
+    1     0 program lab02b;
+    2     0 const N = 1999;
+    3     0 type Tvector = array[0..N] of Real;
+    4     0 var longitud, j, m, dimension, procesos : Integer;
+    5     0 var vektor1, vektor2, result: Tvector;
+    6     0 process type TvectorPoint(var vektorP1,vektorP2:Tvector; init, endIn:Integer; var result: Real);
+    7     0     var k: Integer;
+    8     0     var producto: Real;
+    9     0         begin   
+   10     0             begin
+   11     0             producto := 0;
+   12     4                 for k := init to endIn do
+   13     8                 begin
+   14     8                     producto := ((vektorP1[k] * vektorP2[k]) + producto);
+   15    21                 end;      
+   16    22             end;
+   17    22             result:= producto;
+   18    25         end;
+   19    26     type Tprocesses = ARRAY [0..199] of TvectorPoint;
+   20    26     var processes: Tprocesses;
+   21    26     var resultFinal: Real;
+   22    26     begin
+   23    26         ReadLn( longitud );
+   24    29         dimension:= longitud-1;
+   25    34         ReadLn( procesos );         
+   26    37         begin
+   27    37             for j := 0 to dimension do
+   28    41             begin
+   29    41                 ReadLn( vektor1[j] );
+   30    46             end;      
+   31    47         end;
+   32    47         begin
+   33    47             for j := 0 to dimension do
+   34    51             begin
+   35    51                 ReadLn( vektor2[j] );
+   36    56             end;      
+   37    57         end;
+   38    57         begin
+   39    57             cobegin
+   40    58                 for j:=0 to (procesos-1) do
+   41    64                     processes[j](vektor1, vektor2, j * (longitud div procesos) , (j + 1) * (longitud div procesos)-1, result[j]);
+   42    90             coend;           
+   43    91           resultFinal:= 0;
+   44    95           for m := 0 to (procesos-1) do              
+   45   101                 begin
+   46   101                     resultFinal := resultFinal + result[m];
+   47   109                 end; 
+   48   110             WriteLn(resultFinal);
+   49   113         end;    
+   50   113     end.
+
+
+
+Symbol table
+
+    name       link      objekt       type         ref      nrm  lev  adr  aux
+
+ 45 _main        44     procedure   notyp           2      True    0   26    0
+ 46 any           0     variable    synch           0      True    1    5    0
+ 47 n            46     constant    integer         0     False    1 1999    0
+ 48 tvector      47     type id     array           1     False    1 2000    0
+ 49 longitud     48     variable    integer         0      True    1    5    0
+ 50 j            49     variable    integer         0      True    1    6    0
+ 51 m            50     variable    integer         0      True    1    7    0
+ 52 dimension    51     variable    integer         0      True    1    8    0
+ 53 procesos     52     variable    integer         0      True    1    9    0
+ 54 vektor1      53     variable    array           1      True    1   10    0
+ 55 vektor2      54     variable    array           1      True    1 2010    0
+ 56 result       55     variable    array           1      True    1 4010    0
+ 57 tvectorpoi   56     type id     process         3      True    1    0    0
+ 58 vektorp1      0     variable    array           1     False    2    5    0
+ 59 vektorp2     58     variable    array           1     False    2    6    0
+ 60 init         59     variable    integer         0      True    2    7    0
+ 61 endin        60     variable    integer         0      True    2    8    0
+ 62 result       61     variable    real            0     False    2    9    0
+ 63 k            62     variable    integer         0      True    2   10    0
+ 64 producto     63     variable    real            0      True    2   11    0
+ 65 tprocesses   57     type id     array           2     False    1  200    0
+ 66 processes    65     variable    array           2      True    1 6010    0
+ 67 resultfina   66     variable    real            0      True    1 6210    0
+
+Generated P-code
+
+    0     ldadr        2        11          ;10
+    1     ldcon.i      0         0          ;11
+    2     float        0         0          ;11
+    3     store.r      0         0          ;11
+    4     ldadr        2        10          ;11
+    5     ldval.i      2         7          ;12
+    6     ldval.i      2         8          ;12
+    7     for1u.i      0        22          ;12
+    8     ldadr        2        11          ;13
+    9     ldval.adr    2         5          ;14
+   10     ldval.i      2        10          ;14
+   11     ixary.i      0         1          ;14
+   12     rpadr.r      0         0          ;14
+   13     ldval.adr    2         6          ;14
+   14     ldval.i      2        10          ;14
+   15     ixary.i      0         1          ;14
+   16     rpadr.r      0         0          ;14
+   17     mulop.r      0         0          ;14
+   18     ldval.r      2        11          ;14
+   19     addop.r      0         0          ;14
+   20     store.r      0         0          ;14
+   21     for2u.i      0         8          ;14
+   22     ldval.adr    2         9          ;16
+   23     ldval.r      2        11          ;17
+   24     store.r      0         0          ;17
+   25     rproc        1         0          ;17
+   26     ldadr        1         5          ;23
+   27     rdinp.i      0         0          ;23
+   28     rdlin        0         0          ;23
+   29     ldadr        1         8          ;23
+   30     ldval.i      1         5          ;24
+   31     ldcon.i      0         1          ;24
+   32     subop.i      0         0          ;24
+   33     store.i      0         0          ;24
+   34     ldadr        1         9          ;25
+   35     rdinp.i      0         0          ;25
+   36     rdlin        0         0          ;25
+   37     ldadr        1         6          ;26
+   38     ldcon.i      0         0          ;27
+   39     ldval.i      1         8          ;27
+   40     for1u.i      0        47          ;27
+   41     ldadr        1        10          ;29
+   42     ldval.i      1         6          ;29
+   43     ixary.i      0         1          ;29
+   44     rdinp.r      0         0          ;29
+   45     rdlin        0         0          ;29
+   46     for2u.i      0        41          ;29
+   47     ldadr        1         6          ;32
+   48     ldcon.i      0         0          ;33
+   49     ldval.i      1         8          ;33
+   50     for1u.i      0        57          ;33
+   51     ldadr        1      2010          ;35
+   52     ldval.i      1         6          ;35
+   53     ixary.i      0         1          ;35
+   54     rdinp.r      0         0          ;35
+   55     rdlin        0         0          ;35
+   56     for2u.i      0        51          ;35
+   57     cobeg        0         0          ;37
+   58     ldadr        1         6          ;39
+   59     ldcon.i      0         0          ;40
+   60     ldval.i      1         9          ;40
+   61     ldcon.i      0         1          ;40
+   62     subop.i      0         0          ;40
+   63     for1u.i      0        90          ;40
+   64     mkstk        1        57          ;40
+   65     ldadr        1      6010          ;40
+   66     ldval.i      1         6          ;41
+   67     ixary.i      0         2          ;41
+   68     procv        0         0          ;41
+   69     ldadr        1        10          ;41
+   70     ldadr        1      2010          ;41
+   71     ldval.i      1         6          ;41
+   72     ldval.i      1         5          ;41
+   73     ldval.i      1         9          ;41
+   74     divop.i      0         0          ;41
+   75     mulop.i      0         0          ;41
+   76     ldval.i      1         6          ;41
+   77     ldcon.i      0         1          ;41
+   78     addop.i      0         0          ;41
+   79     ldval.i      1         5          ;41
+   80     ldval.i      1         9          ;41
+   81     divop.i      0         0          ;41
+   82     mulop.i      0         0          ;41
+   83     ldcon.i      0         1          ;41
+   84     subop.i      0         0          ;41
+   85     ldadr        1      4010          ;41
+   86     ldval.i      1         6          ;41
+   87     ixary.i      0         1          ;41
+   88     calls        1         9          ;41
+   89     for2u.i      0        64          ;41
+   90     coend        0         0          ;41
+   91     ldadr        1      6210          ;42
+   92     ldcon.i      0         0          ;43
+   93     float        0         0          ;43
+   94     store.r      0         0          ;43
+   95     ldadr        1         7          ;43
+   96     ldcon.i      0         0          ;44
+   97     ldval.i      1         9          ;44
+   98     ldcon.i      0         1          ;44
+   99     subop.i      0         0          ;44
+  100     for1u.i      0       110          ;44
+  101     ldadr        1      6210          ;45
+  102     ldval.r      1      6210          ;46
+  103     ldadr        1      4010          ;46
+  104     ldval.i      1         7          ;46
+  105     ixary.i      0         1          ;46
+  106     rpadr.r      0         0          ;46
+  107     addop.r      0         0          ;46
+  108     store.r      0         0          ;46
+  109     for2u.i      0       101          ;46
+  110     ldval.r      1      6210          ;48
+  111     wrval.r      0         0          ;48
+  112     wrlin        0         0          ;48
+  113     stopx        0         0          ;49

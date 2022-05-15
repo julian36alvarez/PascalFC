@@ -1,0 +1,70 @@
+- Pascal-FC for IBM PC compatibles - 
+- GNU Compiler Version P5.2.1.5
+
+G L Davies  &  A Burns, University of York
+G Ospina, Escuela Colombiana de Ingenieria Julio Garavito
+
+Compiler listing
+
+    1     0 program linea;
+    2     0   var c: char;
+    3     0       nc: integer;
+    4     0       o: char;
+    5     0       no: integer;
+    6     0       m: integer;
+    7     0 begin
+    8     0   read(c);
+    9     2   read(nc);
+   10     4   read(o);
+   11     6   read(no);
+   12     8   readln(m);
+   13    11   writeln(c, ' ', nc, ' ', o, ' ', no, ' ', m);
+   14    30 end.
+
+
+
+Symbol table
+
+    name       link      objekt       type         ref      nrm  lev  adr  aux
+
+ 45 _main        44     procedure   notyp           2      True    0    0    0
+ 46 any           0     variable    synch           0      True    1    5    0
+ 47 c            46     variable    char            0      True    1    5    0
+ 48 nc           47     variable    integer         0      True    1    6    0
+ 49 o            48     variable    char            0      True    1    7    0
+ 50 no           49     variable    integer         0      True    1    8    0
+ 51 m            50     variable    integer         0      True    1    9    0
+
+Generated P-code
+
+    0     ldadr        1         5          ;8
+    1     rdinp.c      0         0          ;8
+    2     ldadr        1         6          ;9
+    3     rdinp.i      0         0          ;9
+    4     ldadr        1         7          ;10
+    5     rdinp.c      0         0          ;10
+    6     ldadr        1         8          ;11
+    7     rdinp.i      0         0          ;11
+    8     ldadr        1         9          ;12
+    9     rdinp.i      0         0          ;12
+   10     rdlin        0         0          ;12
+   11     ldval.c      1         5          ;13
+   12     wrval.c      0         0          ;13
+   13     ldcon.c      0        32          ;13
+   14     wrval.c      0         0          ;13
+   15     ldval.i      1         6          ;13
+   16     wrval.i      0         0          ;13
+   17     ldcon.c      0        32          ;13
+   18     wrval.c      0         0          ;13
+   19     ldval.c      1         7          ;13
+   20     wrval.c      0         0          ;13
+   21     ldcon.c      0        32          ;13
+   22     wrval.c      0         0          ;13
+   23     ldval.i      1         8          ;13
+   24     wrval.i      0         0          ;13
+   25     ldcon.c      0        32          ;13
+   26     wrval.c      0         0          ;13
+   27     ldval.i      1         9          ;13
+   28     wrval.i      0         0          ;13
+   29     wrlin        0         0          ;13
+   30     stopx        0         0          ;13

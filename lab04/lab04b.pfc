@@ -1,0 +1,139 @@
+program lab04b;
+
+var
+mutex: semaphore;
+nsucursales, ncajeros, ncuentas, noperaciones, i, v: integer;
+cuentas : array[0..999] of Integer;
+operaciones : array[0..4999] of Integer;
+
+canal : array[0..4999] of char;
+idoficina : array[0..4999] of Integer;
+tipotx : array[0..4999] of char;
+operacioncuenta : array[0..4999] of Integer;
+cantidad : array[0..4999] of Integer;
+txsemaforo: array[0..6000] of semaphore;
+
+monitor incremento;
+export wait, signal;
+var gcsem :condition;
+sem:boolean;
+procedure wait;
+begin
+    if sem then delay(gcsem);
+    sem:=true;
+end;
+procedure signal;
+begin
+    if not empty(gcsem) then resume(gcsem)
+    else sem:=false;
+end;
+begin
+    sem:=false;
+end;
+
+
+{..................GENERAL.......................}
+process type TPrincipal;
+begin
+     
+    incremento.wait;
+        WriteLn(cuentas[0]);
+        WriteLn(cuentas[1]);
+    incremento.signal;
+end;
+{..................FIN GENERAL.......................}
+
+{..................TRANSACIONES.......................}
+process type TTransferencias(var xcanal:char; xidoficina:integer; xtipotx:char; xoperacioncuenta, cantidad :integer; vsm, noperaciones:integer);
+begin
+     
+    {wait(txsemaforo[vsm]);}
+    incremento.wait;
+
+    {COSIGNAR}  
+    if xtipotx = 'C' then
+    begin    
+        {WriteLn(cuentas[xoperacioncuenta]);}
+        cuentas[xoperacioncuenta] := cuentas[xoperacioncuenta]+cantidad;
+        
+    end
+    {RETIRAR}
+    else if xtipotx = 'R' then
+    begin
+     {WriteLn(cuentas[xoperacioncuenta]);}
+        cuentas[xoperacioncuenta] := cuentas[xoperacioncuenta]-cantidad;
+
+    end
+    {SALDO}
+    else if xtipotx = 'S' then
+    begin
+        {WriteLn(cuentas[xoperacioncuenta]);}
+    end;
+        {signal(txsemaforo[vsm]);}
+        incremento.signal;
+    if vsm = noperaciones then
+    begin
+        incremento.signal;
+    end;
+end;
+{..................FIN TRANSACIONES.......................}
+var pprincipal: TPrincipal;
+
+type TprocessestX = ARRAY[0..2000] of TTransferencias;
+var ptx: TprocessestX;   
+
+begin
+        ReadLn( nsucursales );
+        ReadLn( ncajeros );
+        ReadLn( ncuentas );
+
+        for i := 0 to (ncuentas-1) do
+        begin
+            ReadLn( cuentas[i] );
+        end;
+
+        ReadLn( noperaciones );
+
+        for i := 0 to (noperaciones-1) do
+        begin
+            Read( canal[i] ); 
+            Read( idoficina[i] );
+            Read( tipotx[i] );
+            
+          if (((canal[i]='S') and (tipotx[i]='C')) or ((canal[i]='S') and (tipotx[i]='R')) or ((canal[i]='C') and (tipotx[i]='R')) ) then
+            begin
+                Read( operacioncuenta[i] );
+                ReadLn( cantidad[i] );
+            end
+            else
+            begin
+                ReadLn( operacioncuenta[i] );
+          end;
+        end;
+
+        {initial(mutex,0);}
+        {for i := 0 to (noperaciones-1) do
+           begin
+              if i>=0 then
+                begin 
+                    initial(txsemaforo[i],1);
+                end
+                else
+                begin
+                    initial(txsemaforo[i],1);
+                end;
+            end;}
+            
+
+            cobegin
+                pprincipal;
+                    for i := 0 to (noperaciones-1) do
+                        ptx[i](canal[i],idoficina[i],tipotx[i],(operacioncuenta[i]-1),cantidad[i], i, (noperaciones-1));        
+            coend;       
+end.
+
+
+
+
+
+
