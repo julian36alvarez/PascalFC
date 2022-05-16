@@ -1,4 +1,7 @@
-# PascalFC
+# ESCUELA COLOMBIANA DE INGENIERÍA
+**Concurrencia, Paralelismo y Computacion de Alto Desempeño**
+
+## PascalFC
 
 Server
 
